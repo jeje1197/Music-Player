@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/purple_200"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/songs_text"
+        android:textColor="@color/black"
+        android:text="SONGS"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/informationButton"
+        android:layout_alignParentEnd="true"
+        android:paddingTop="7dp"
+        android:paddingRight="8dp"
+        android:src="@drawable/ic_baseline_info_24"
+        android:contentDescription="App Information" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/no_songs_text"
+        android:text="NO SONGS FOUND"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/minibar_layout"
+        android:layout_below="@id/songs_text"
+        android:scrollbars="vertical" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/minibar_layout"
+        android:layout_alignParentBottom="true"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:background="@color/purple_200">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/mini_current_song"
+            android:text="No Song Selected"
+            android:textColor="@color/black"
+            android:textSize="16dp"
+            android:textAlignment="center"
+            android:ellipsize="marquee"
+            android:layout_toStartOf="@id/mini_previous"
+            android:paddingTop="14dp"
+
+            />
+
+        <TextView
+            android:id="@+id/mini_current_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/mini_current_song"
+            android:layout_toStartOf="@id/mini_previous"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingTop="1dp"
+            android:text="---"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/mini_previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/mini_pause_play"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_baseline_skip_previous_24" />
+
+        <ImageView
+            android:id="@+id/mini_pause_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/mini_next"
+            android:src="@drawable/ic_baseline_play_circle_outline_24" />
+
+        <ImageView
+            android:id="@+id/mini_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_baseline_skip_next_24" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
