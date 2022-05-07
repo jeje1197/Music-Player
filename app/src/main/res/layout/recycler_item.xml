@@ -16,7 +16,7 @@
         android:id="@+id/icon_view"
         android:layout_centerVertical="true"
         android:contentDescription="Music Icon"
-        android:src="@drawable/music_icon"/>
+        android:src="@drawable/music_icon_compress"/>
 
     <TextView
         android:id="@+id/music_title_text"

@@ -55,6 +55,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
 
 //        Update the view for the current song (title, progress bar)
         setResourcesWithMusic();
+        loadShuffleAndRepeatStates();
 
         MusicPlayerActivity.this.runOnUiThread(new Runnable() {
             @Override
@@ -64,8 +65,9 @@ public class MusicPlayerActivity extends AppCompatActivity {
                         setResourcesWithMusic();
                     }
 
-                    seekbar.setProgress(mediaPlayer.getCurrentPosition());
-                    currentTimeView.setText(convertToMMSS(mediaPlayer.getCurrentPosition() + ""));
+                    int currentPosition = mediaPlayer.getCurrentPosition();
+                    seekbar.setProgress(currentPosition);
+                    currentTimeView.setText(convertToMMSS(currentPosition + ""));
 
                     if(mediaPlayer.isPlaying()) {
                         pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24);
@@ -97,7 +99,6 @@ public class MusicPlayerActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
-        loadShuffleAndRepeatStates();
     }
 
     void setResourcesWithMusic() {
@@ -186,6 +187,9 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
 
+//    ----------------------------------------------------------------------------------------------
+//    Lifecycle Methods here
+//    ----------------------------------------------------------------------------------------------
     @Override
     protected void onStart() {
         isActive = true;

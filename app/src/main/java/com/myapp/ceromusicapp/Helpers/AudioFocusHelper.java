@@ -4,16 +4,15 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
-import android.os.Build;
+import android.media.MediaPlayer;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import com.myapp.ceromusicapp.MyMediaPlayer;
 
-@RequiresApi(api = Build.VERSION_CODES.O)
 public class AudioFocusHelper {
     private static AudioManager audioManager;
+    private static final MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
 
     public static void initializeAudioManager(Context context) {
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -38,38 +37,56 @@ public class AudioFocusHelper {
     // change in the focus which Android system grants for
     final static AudioManager.OnAudioFocusChangeListener audioFocusChangeListener =
             i -> {
+
                 switch (i) {
                     case AudioManager.AUDIOFOCUS_GAIN:
                         Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_GAIN ------------------");
-                        MyMediaPlayer.pausePlay();
+                        mediaPlayer.setVolume(1f, 1f);
+                        startPlayer();
+                        break;
+
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS ------------------");
+                        pausePlayer();
                         break;
 
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS_TRANSIENT " +
                                 "------------------");
-//                        if (MyMediaPlayer.currentIndex != -1) {
-//                            MyMediaPlayer.instance.pause();
-//                            MediaSessionHelper.updatePlaybackState(MyMediaPlayer.mediaSession,
-//                                    PlaybackStateCompat.STATE_PAUSED);
-//                        }
-                        MyMediaPlayer.pausePlay();
+                        pausePlayer();
                         break;
 
-                    case AudioManager.AUDIOFOCUS_LOSS:
-                        Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS ------------------");
-//                        if (MyMediaPlayer.currentIndex != -1) {
-//                            MyMediaPlayer.instance.pause();
-//                            MediaSessionHelper.updatePlaybackState(MyMediaPlayer.mediaSession,
-//                                    PlaybackStateCompat.STATE_PAUSED);
-//                        }
-                        MyMediaPlayer.pausePlay();
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                        Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS_TRANSIENT " +
+                                "------------------");
+                        if (mediaPlayer.isPlaying()) {
+                            mediaPlayer.setVolume(0.3f, 0.3f);
+                        }
                         break;
                 }
             };
 
-    public static AudioFocusRequest audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+    private static final AudioFocusRequest audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(getPlaybackAttributes())
             .setAcceptsDelayedFocusGain(true)
             .setOnAudioFocusChangeListener(audioFocusChangeListener)
             .build();
+
+    public static void release() {
+        audioManager.abandonAudioFocusRequest(audioFocusRequest);
+        audioManager = null;
+    }
+
+//    Helper functions to start/pause mediaplayer instance
+//    without checking any extra conditions unlike in MyMediaPlayer.class
+    private static void startPlayer() {
+        mediaPlayer.start();
+        MediaSessionHelper.updatePlaybackState(MyMediaPlayer.mediaSession, PlaybackStateCompat.STATE_PLAYING);
+    }
+
+    private static void pausePlayer() {
+        mediaPlayer.pause();
+        MediaSessionHelper.updatePlaybackState(MyMediaPlayer.mediaSession, PlaybackStateCompat.STATE_PAUSED);
+    }
+
 }

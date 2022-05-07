@@ -5,7 +5,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -27,13 +26,11 @@ public class MediaSessionHelper {
 //    Creates a notification channel
     public static void createChannel(Context context) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "General",
-                    NotificationManager.IMPORTANCE_HIGH);
-            channel.setShowBadge(false);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            }
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "General",
+                NotificationManager.IMPORTANCE_HIGH);
+        channel.setShowBadge(false);
+        if (manager != null) {
+            manager.createNotificationChannel(channel);
         }
     }
 
@@ -71,7 +68,7 @@ public class MediaSessionHelper {
             return new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setContentTitle(description.getTitle())
                     .setContentText(description.getSubtitle())
-                    .setSmallIcon(R.drawable.music_icon)
+                    .setSmallIcon(R.drawable.music_icon_compress)
                     .setSilent(true)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setContentIntent(contentPendingIntent)

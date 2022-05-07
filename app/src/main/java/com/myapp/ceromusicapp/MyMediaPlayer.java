@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -15,7 +14,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.media.session.MediaButtonReceiver;
 
 import com.myapp.ceromusicapp.Helpers.AudioFocusHelper;
@@ -24,14 +22,14 @@ import com.myapp.ceromusicapp.Helpers.MediaSessionHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@RequiresApi(api = Build.VERSION_CODES.O)
+
 public class MyMediaPlayer extends Service {
     public static MediaPlayer instance;
     protected static ArrayList<AudioModel> songList;
-    public static int currentIndex = -1;
+    protected static int currentIndex = -1;
     protected static AudioModel currentSong;
     public static MediaSessionCompat mediaSession;
-    private NotificationManager notificationManager;
+    private static NotificationManager notificationManager;
 
 
     @Nullable
@@ -229,11 +227,15 @@ public class MyMediaPlayer extends Service {
 
 //    Releases all key data objects
     public static void releaseAll() {
-        instance.release();
-        instance = null;
+        AudioFocusHelper.release();
+
         mediaSession.setActive(false);
         mediaSession.release();
         mediaSession = null;
+
+        instance.release();
+        instance = null;
+
     }
 
     @Override

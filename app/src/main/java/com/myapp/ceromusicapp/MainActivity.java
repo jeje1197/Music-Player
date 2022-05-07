@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.File;
 import java.util.ArrayList;
 
+
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
@@ -61,8 +62,6 @@ public class MainActivity extends AppCompatActivity {
         ImageView infoButton = findViewById(R.id.informationButton);
         infoButton.setOnClickListener(view -> displayAppInfo());
 
-        setupMinibar();
-        setupMinibarButtons();
         //        setShuffleFunctionality(shuffleOn);
         setRepeatFunctionality(repeatMode);
 
@@ -72,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getSongsFromDevice();
         }
+
+        setupMinibar();
+        setupMinibarButtons();
     }
 
 
@@ -157,14 +159,14 @@ public class MainActivity extends AppCompatActivity {
         if (MyMediaPlayer.currentIndex == -1) {
             return "No Song Selected";
         }
-        return songList.get(MyMediaPlayer.currentIndex).getTitle();
+        return MyMediaPlayer.currentSong.getTitle();
     }
 
     private String getCurrentSongArtist() {
         if (MyMediaPlayer.currentIndex == -1) {
             return "---";
         }
-        return songList.get(MyMediaPlayer.currentIndex).getArtist();
+        return MyMediaPlayer.currentSong.getArtist();
     }
 
     private void goToCurrentSongView() {
@@ -220,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
                     if (minibarTextView.getText() != currentSongTitle) {
                         minibarTextView.setText(currentSongTitle);
                         minibarArtistView.setText(getCurrentSongArtist());
+                        updateRecyclerView();
                     }
                 }
                 new Handler().postDelayed(this, 100);
@@ -238,7 +241,9 @@ public class MainActivity extends AppCompatActivity {
         minibarTextView.setOnClickListener(view -> goToCurrentSongView());
     }
 
-    // --------------------------------------
+//    ----------------------------------------------------------------------------------------------
+//    Lifecycle Methods here
+//    ----------------------------------------------------------------------------------------------
 
 //    Lifecycle methods
     @Override

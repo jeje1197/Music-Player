@@ -44,9 +44,19 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         }
 
         holder.itemView.setOnClickListener(view -> {
-//            Set current song index & start playing song
+//            Set current song index
             MyMediaPlayer.currentIndex = holder.getAdapterPosition();
-            context.startService(new Intent(context, MyMediaPlayer.class));
+
+//            Note: MyMediaPlayer (Service) calls startSong() in the onCreate() method.
+//            So if it's not the first time around, you have to make an explicit
+//            call to startSong().
+//            Hint: mediaSession correlates to the service being active
+//            so we can use (mediaSession == null) as a condition.
+            if (MyMediaPlayer.mediaSession == null) {
+                context.startService(new Intent(context, MyMediaPlayer.class));
+            } else {
+                MyMediaPlayer.startSong();
+            }
 
             Intent intent = new Intent(context, MusicPlayerActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
