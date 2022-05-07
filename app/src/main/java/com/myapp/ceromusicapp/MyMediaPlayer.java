@@ -1,13 +1,12 @@
 package com.myapp.ceromusicapp;
 
-import static com.myapp.ceromusicapp.MediaSessionHelper.updateMetadata;
-import static com.myapp.ceromusicapp.MediaSessionHelper.updatePlaybackState;
 
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -16,19 +15,23 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.media.session.MediaButtonReceiver;
+
+import com.myapp.ceromusicapp.Helpers.AudioFocusHelper;
+import com.myapp.ceromusicapp.Helpers.MediaSessionHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class MyMediaPlayer extends Service {
-    protected static MediaPlayer instance;
+    public static MediaPlayer instance;
     protected static ArrayList<AudioModel> songList;
-    protected static int currentIndex = -1;
+    public static int currentIndex = -1;
     protected static AudioModel currentSong;
-    protected static MediaSessionCompat mediaSession;
-    private final String CHANNEL_ID = "channel1";
-    private NotificationManager manager;
+    public static MediaSessionCompat mediaSession;
+    private NotificationManager notificationManager;
 
 
     @Nullable
@@ -41,9 +44,10 @@ public class MyMediaPlayer extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        MediaSessionHelper.createChannel(this, CHANNEL_ID);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        MediaSessionHelper.createChannel(this);
         mediaSession = initializeMediaSession(this);
+        AudioFocusHelper.initializeAudioManager(this);
         startSong();
     }
 
@@ -73,9 +77,15 @@ public class MyMediaPlayer extends Service {
         try {
             instance.setDataSource(currentSong.getPath());
             instance.prepare();
-            instance.start();
-            updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
-            updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
+
+            MediaSessionHelper.updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
+
+            boolean audioFocusGranted = AudioFocusHelper.isAudioFocusGranted();
+            Log.d("startSong()", "------------------ Request Granted: "+ audioFocusGranted);
+            if (audioFocusGranted) {
+                instance.start();
+                MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,10 +97,14 @@ public class MyMediaPlayer extends Service {
 
         if (instance.isPlaying()) {
             instance.pause();
-            updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PAUSED);
+            MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PAUSED);
         } else {
-            instance.start();
-            updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
+            boolean audioFocusGranted = AudioFocusHelper.isAudioFocusGranted();
+            Log.d("pausePlay()", "------------------ Request Granted: "+ audioFocusGranted);
+            if (audioFocusGranted) {
+                instance.start();
+                MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
+            }
         }
     }
 
@@ -120,6 +134,11 @@ public class MyMediaPlayer extends Service {
 //    reference so performance is faster
 //    - Set your shuffle/repeat functionality within your activity
 //    Updates faster and makes buttons look more responsive
+
+
+//    ----------------------------------------------------------------------------------------------
+//    Handle MediaSession here
+//    ----------------------------------------------------------------------------------------------
 
     private MediaSessionCompat initializeMediaSession(Context context){
         MediaSessionCompat mediaSession = new MediaSessionCompat(context, "MediaSession Tag");
@@ -164,7 +183,7 @@ public class MyMediaPlayer extends Service {
             @Override
             public void onStop() {
                 instance.pause();
-                updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_STOPPED);
+                MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_STOPPED);
                 Log.d("onStop()", "Notification swiped away");
                 super.onStop();
             }
@@ -179,13 +198,13 @@ public class MyMediaPlayer extends Service {
                 switch (state.getState()) {
                     case PlaybackStateCompat.STATE_PLAYING:
                         startForeground(1, MediaSessionHelper.getNotification(context, mediaSession,
-                                CHANNEL_ID, true).build());
+                                true).build());
                         Log.d("State_Playing", "Starting foreground");
                         break;
 
                     case PlaybackStateCompat.STATE_PAUSED:
-                        manager.notify(1, MediaSessionHelper.getNotification(context, mediaSession,
-                                CHANNEL_ID, false)
+                        notificationManager.notify(1, MediaSessionHelper.getNotification(context, mediaSession,
+                                false)
                         .build());
                         stopForeground(false);
 

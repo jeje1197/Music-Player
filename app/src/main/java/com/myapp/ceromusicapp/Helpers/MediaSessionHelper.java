@@ -1,4 +1,4 @@
-package com.myapp.ceromusicapp;
+package com.myapp.ceromusicapp.Helpers;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,15 +15,20 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.media.session.MediaButtonReceiver;
 
+import com.myapp.ceromusicapp.MainActivity;
+import com.myapp.ceromusicapp.MusicPlayerActivity;
+import com.myapp.ceromusicapp.R;
+
 public class MediaSessionHelper {
     private static PlaybackStateCompat.Builder playbackBuilder;
     private static MediaMetadataCompat.Builder metadataBuilder;
+    private static final String CHANNEL_ID = "channel1";
 
 //    Creates a notification channel
-    public static void createChannel(Context context, String channelId) {
+    public static void createChannel(Context context) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel channel = new NotificationChannel(channelId, "General",
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "General",
                     NotificationManager.IMPORTANCE_HIGH);
             channel.setShowBadge(false);
             if (manager != null) {
@@ -34,7 +39,7 @@ public class MediaSessionHelper {
 
 //    Create a notification from the data stored in the MediaSession's metadata
     public static NotificationCompat.Builder getNotification(Context context, MediaSessionCompat mediaSession,
-                                                             String channelId, boolean playing) {
+                                                             boolean playing) {
 
         MediaControllerCompat mediaController = mediaSession.getController();
         MediaMetadataCompat metadata = mediaController.getMetadata();
@@ -63,7 +68,7 @@ public class MediaSessionHelper {
         NotificationCompat.Action skipNextAction = new NotificationCompat.Action(R.drawable.mini_next, "Next",
                 MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT));
 
-            return new NotificationCompat.Builder(context, channelId)
+            return new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setContentTitle(description.getTitle())
                     .setContentText(description.getSubtitle())
                     .setSmallIcon(R.drawable.music_icon)
