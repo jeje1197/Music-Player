@@ -283,7 +283,7 @@ public class MyMediaPlayer extends Service {
     @Override
     public void onDestroy() {
         Log.d("-On Destroy: MyMediaPlayer", "Service destroyed");
-        releaseAll();
+//        releaseAll();
         super.onDestroy();
     }
 
