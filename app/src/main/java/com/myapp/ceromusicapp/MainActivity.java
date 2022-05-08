@@ -57,16 +57,19 @@ public class MainActivity extends AppCompatActivity {
         miniPreviousButton = findViewById(R.id.mini_previous);
         miniPausePlayButton = findViewById(R.id.mini_pause_play);
         miniNextButton = findViewById(R.id.mini_next);
+
+//        Load user preferences
+//        Shuffle/Repeat states & screen position
         sp = getSharedPreferences("myMusicPlayerSettings", Context.MODE_PRIVATE);
         savedPosition = sp.getInt("savedPosition", 0);
         boolean shuffleOn = sp.getBoolean("shuffleOn", false);
         int repeatMode = sp.getInt("repeatMode", 0);
 
-        ImageView infoButton = findViewById(R.id.informationButton);
-        infoButton.setOnClickListener(view -> displayAppInfo());
-
         MediaPlayerHelper.setShuffleFunctionality(shuffleOn);
         MediaPlayerHelper.setRepeatFunctionality(repeatMode);
+
+        ImageView infoButton = findViewById(R.id.informationButton);
+        infoButton.setOnClickListener(view -> displayAppInfo());
 
 //        Check & request permissions
         if(!checkForPermission()) {

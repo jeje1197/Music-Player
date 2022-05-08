@@ -12,16 +12,14 @@ Features:
 
 - List of Songs
 - Multiple aesthetic song displays w/ buttons
-- Repeat Functionality
+- Shuffle & Repeat Functionality
 - Media Style Notifications
 - Works with Bluetooth Device Buttons
 - AudioFocus
 
 Future:
-- Update Recycler View To Show Current Song Automatically
-- Remember Most Recently Played Song After Closed
-- Shuffle Capability
-- Revised Repeat Functionality to work with shuffled playlist
+- Remember Most Recently Played Song & Position After Closed
+- Update Recycler View To Show Current Song Colored Automatically
 - Playlist Creation
-- Accessibility
-- Choice of Theme
+- Accessibility (Text Size)
+- Choice of Theme (Background Color)

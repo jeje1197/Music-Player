@@ -53,9 +53,10 @@ public class MusicPlayerActivity extends AppCompatActivity {
         titleView.setHorizontallyScrolling(true);
         titleView.setSelected(true);
 
-//        Update the view for the current song (title, progress bar)
+//        Update the view for the current song info & shuffle/repeat states
         setResourcesWithMusic();
         loadShuffleAndRepeatStates();
+
 
         MusicPlayerActivity.this.runOnUiThread(new Runnable() {
             @Override
