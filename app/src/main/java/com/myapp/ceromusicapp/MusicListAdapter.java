@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.myapp.ceromusicapp.Helpers.MediaPlayerHelper;
+
 import java.util.ArrayList;
 
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.ViewHolder>{
@@ -37,6 +39,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         AudioModel songData = songList.get(position);
         holder.titleTextView.setText(songData.getTitle());
         holder.artistTextView.setText(songData.getArtist());
+        holder.durationTextView.setText(MediaPlayerHelper.convertToMMSS(songData.getDuration()));
 
         if (MyMediaPlayer.currentIndex == holder.getAdapterPosition()) {
             holder.titleTextView.setTextColor(Color.parseColor("#FF0000"));
@@ -76,13 +79,14 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView titleTextView, artistTextView;
+        TextView titleTextView, artistTextView, durationTextView;
         ImageView iconImageView;
         public ViewHolder(View itemView) {
             super(itemView);
             titleTextView = itemView.findViewById(R.id.music_title_text);
             iconImageView = itemView.findViewById(R.id.icon_view);
             artistTextView = itemView.findViewById(R.id.music_artist_text);
+            durationTextView = itemView.findViewById(R.id.music_duration_text);
         }
     }
 

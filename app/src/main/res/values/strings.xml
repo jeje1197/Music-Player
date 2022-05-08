@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Cero\'s Music App</string>
+    <string name="info_button">Information Button</string>
+    <string name="music_icon">Music Icon</string>
+    <string name="song_title">Song Title</string>
+    <string name="song_artist">Song Artist</string>
+    <string name="song_duration">Song Length</string>
+    <string name="example_time_value">00:00</string>
 </resources>

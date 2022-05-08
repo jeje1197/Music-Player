@@ -7,6 +7,8 @@ import com.myapp.ceromusicapp.MyMediaPlayer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MediaPlayerHelper {
 
@@ -53,6 +55,13 @@ public class MediaPlayerHelper {
             case 2:
                 MyMediaPlayer.instance.setOnCompletionListener(player -> MyMediaPlayer.startSong());
         }
+    }
+
+    public static String convertToMMSS(String duration) {
+        long millis = Long.parseLong(duration);
+        return String.format(Locale.US, "%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
 
 }

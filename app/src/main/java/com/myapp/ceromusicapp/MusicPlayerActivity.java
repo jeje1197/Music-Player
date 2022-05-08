@@ -13,9 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.myapp.ceromusicapp.Helpers.MediaPlayerHelper;
 
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-
 public class MusicPlayerActivity extends AppCompatActivity {
 
     private TextView titleView, artistView, currentTimeView, totalTimeView;
@@ -68,7 +65,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
 
                     int currentPosition = mediaPlayer.getCurrentPosition();
                     seekbar.setProgress(currentPosition);
-                    currentTimeView.setText(convertToMMSS(currentPosition + ""));
+                    currentTimeView.setText(MediaPlayerHelper.convertToMMSS(currentPosition + ""));
 
                     if(mediaPlayer.isPlaying()) {
                         pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24);
@@ -111,15 +108,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
         currentSong = MyMediaPlayer.currentSong;
         titleView.setText(currentSong.getTitle());
         artistView.setText(currentSong.getArtist());
-        totalTimeView.setText(convertToMMSS(currentSong.getDuration()));
+        totalTimeView.setText(MediaPlayerHelper.convertToMMSS(currentSong.getDuration()));
         seekbar.setMax(mediaPlayer.getDuration());
-    }
-
-    public static String convertToMMSS(String duration) {
-        long millis = Long.parseLong(duration);
-        return String.format(Locale.US, "%02d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
 
 

@@ -15,7 +15,7 @@
         android:layout_height="36dp"
         android:id="@+id/icon_view"
         android:layout_centerVertical="true"
-        android:contentDescription="Music Icon"
+        android:contentDescription="@string/music_icon"
         android:src="@drawable/music_icon_compress"/>
 
     <TextView
@@ -30,18 +30,35 @@
         android:paddingRight="10dp"
         android:textColor="@color/black"
         android:textSize="18sp"
-        tools:text="Title" />
+        tools:text="Title"
+        android:contentDescription="@string/song_title"/>
 
     <TextView
         android:id="@+id/music_artist_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/icon_view"
+        android:layout_toStartOf="@id/music_duration_text"
         android:layout_below="@id/music_title_text"
         android:ellipsize="end"
         android:maxLines="1"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:textColor="@android:color/tab_indicator_text"
-        tools:text="Artist" />
+        tools:text="Artist"
+        android:contentDescription="@string/song_artist"/>
+
+    <TextView
+        android:id="@+id/music_duration_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/music_title_text"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/song_duration"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textColor="@android:color/tab_indicator_text"
+        tools:text="00:00" />
 </RelativeLayout>
