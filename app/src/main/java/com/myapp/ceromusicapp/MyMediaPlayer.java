@@ -1,6 +1,5 @@
 package com.myapp.ceromusicapp;
 
-
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -22,12 +21,12 @@ import com.myapp.ceromusicapp.Helpers.MediaSessionHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 
-
 public class MyMediaPlayer extends Service {
     public static MediaPlayer instance;
-    protected static ArrayList<AudioModel> songList;
-    protected static int currentIndex = -1;
-    protected static AudioModel currentSong;
+    public static ArrayList<AudioModel> originalList,
+            shuffledList, currentList;
+    public static int currentIndex = -1;
+    public static AudioModel currentSong;
     public static MediaSessionCompat mediaSession;
     private static NotificationManager notificationManager;
 
@@ -42,6 +41,9 @@ public class MyMediaPlayer extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("-Media Player Service onCreate()",
+                "mediaPlayer: " + instance);
+
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         MediaSessionHelper.createChannel(this);
         mediaSession = initializeMediaSession(this);
@@ -55,6 +57,11 @@ public class MyMediaPlayer extends Service {
         return START_STICKY;
     }
 
+
+//    ----------------------------------------------------------------------------------------------
+//    MediaPlayer & SongList Getter Methods here
+//    ----------------------------------------------------------------------------------------------
+
     public static MediaPlayer getInstance() {
         if (instance == null) {
             instance = new MediaPlayer();
@@ -62,15 +69,26 @@ public class MyMediaPlayer extends Service {
         return instance;
     }
 
-    public static ArrayList<AudioModel> getSongList() {
-        if (songList == null) {
-            songList = new ArrayList<>();
+    public static ArrayList<AudioModel> getOriginalList() {
+        if (originalList == null) {
+            originalList = new ArrayList<>();
         }
-        return songList;
+        return originalList;
     }
 
+
+//    ----------------------------------------------------------------------------------------------
+//    Playback Methods here
+//    ----------------------------------------------------------------------------------------------
+
+//    Sets current song, updates metadata, requests audio focus,
+//    starts the media player and updates playback state.
     public static void startSong() {
-        currentSong = songList.get(currentIndex);
+        Log.d("-startSong()",
+                "mediaPlayer: " + instance +
+                "currentIndex: " + currentIndex);
+
+        currentSong = currentList.get(currentIndex);
         instance.reset();
         try {
             instance.setDataSource(currentSong.getPath());
@@ -79,7 +97,7 @@ public class MyMediaPlayer extends Service {
             MediaSessionHelper.updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
 
             boolean audioFocusGranted = AudioFocusHelper.isAudioFocusGranted();
-            Log.d("startSong()", "------------------ Request Granted: "+ audioFocusGranted);
+            Log.d("-startSong()", "Request Granted: "+ audioFocusGranted);
             if (audioFocusGranted) {
                 instance.start();
                 MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
@@ -89,6 +107,8 @@ public class MyMediaPlayer extends Service {
         }
     }
 
+//    Pauses media player if playing. Starts media player if paused.
+//    Updates playback state.
     public static void pausePlay() {
         if(MyMediaPlayer.currentIndex == -1)
             return;
@@ -98,7 +118,7 @@ public class MyMediaPlayer extends Service {
             MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PAUSED);
         } else {
             boolean audioFocusGranted = AudioFocusHelper.isAudioFocusGranted();
-            Log.d("pausePlay()", "------------------ Request Granted: "+ audioFocusGranted);
+            Log.d("-pausePlay()", "------------------ Request Granted: "+ audioFocusGranted);
             if (audioFocusGranted) {
                 instance.start();
                 MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
@@ -106,22 +126,28 @@ public class MyMediaPlayer extends Service {
         }
     }
 
+//    Decrements the current index if current position >= 3sec
+//    and calls startSong(). Otherwise, restarts the current song.
     public static void playPreviousSong() {
         if (currentIndex == -1) {
             return;
         }
-//        If playback is less than 3sec in, get previous song,
-//        otherwise restart current song from beginning
+
         if (currentIndex > 0 && instance.getCurrentPosition() < 3000 )
             currentIndex--;
 
         startSong();
     }
 
+//    Increments the current index to the next song
+//    and calls startSong().
     public static void playNextSong() {
-        if (currentIndex == -1 || currentIndex == songList.size() - 1)
+        if (currentIndex == -1)
             return;
-        currentIndex++;
+
+        if (currentIndex < currentList.size() - 1)
+            currentIndex++;
+
         startSong();
     }
 
@@ -135,46 +161,49 @@ public class MyMediaPlayer extends Service {
 
 
 //    ----------------------------------------------------------------------------------------------
-//    Handle MediaSession here
+//    MediaSession Methods here
 //    ----------------------------------------------------------------------------------------------
 
+//    Creates new media session object, sets callbacks for MediaBroadcastReceiver
+//    and PlaybackState updates, sets media session to active.
+//    Return: media session object
     private MediaSessionCompat initializeMediaSession(Context context){
-        MediaSessionCompat mediaSession = new MediaSessionCompat(context, "MediaSession Tag");
+        MediaSessionCompat mediaSession = new MediaSessionCompat(context, "MediaSession");
 
 //        Set callbacks for MediaBroadcastReceiver
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
             public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
                 KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-                Log.d("onMediaButtonEvent()", "KeyEvent: "+ keyEvent.toString());
+                Log.d("-onMediaButtonEvent()", "KeyEvent: "+ keyEvent.toString());
                 return super.onMediaButtonEvent(mediaButtonEvent);
             }
 
             @Override
             public void onSkipToPrevious() {
                 playPreviousSong();
-                Log.d("onSkipToPrevious()", "Starting Previous Song");
+                Log.d("-onSkipToPrevious()", "Starting Previous Song");
                 super.onSkipToPrevious();
             }
 
             @Override
             public void onPlay() {
                 pausePlay();
-                Log.d("onPlay()", "Playing song");
+                Log.d("-onPlay()", "Playing song");
                 super.onPlay();
             }
 
             @Override
             public void onPause() {
                 pausePlay();
-                Log.d("onPause()", "Pausing song");
+                Log.d("-onPause()", "Pausing song");
                 super.onPause();
             }
 
             @Override
             public void onSkipToNext() {
                 playNextSong();
-                Log.d("onSkipToNext()", "Starting next song");
+                Log.d("-onSkipToNext()", "Starting next song");
                 super.onSkipToNext();
             }
 
@@ -182,12 +211,12 @@ public class MyMediaPlayer extends Service {
             public void onStop() {
                 instance.pause();
                 MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_STOPPED);
-                Log.d("onStop()", "Notification swiped away");
+                Log.d("-onStop()", "Notification swiped away");
                 super.onStop();
             }
         });
 
-//        Set callback for playback updates
+//        Set callback for playback state updates
         mediaSession.getController().registerCallback(new MediaControllerCompat.Callback() {
             @Override
             public void onPlaybackStateChanged(PlaybackStateCompat state) {
@@ -197,7 +226,7 @@ public class MyMediaPlayer extends Service {
                     case PlaybackStateCompat.STATE_PLAYING:
                         startForeground(1, MediaSessionHelper.getNotification(context, mediaSession,
                                 true).build());
-                        Log.d("State_Playing", "Starting foreground");
+                        Log.d("-State_Playing", "Starting foreground");
                         break;
 
                     case PlaybackStateCompat.STATE_PAUSED:
@@ -206,15 +235,15 @@ public class MyMediaPlayer extends Service {
                         .build());
                         stopForeground(false);
 
-                        Log.d("State_Paused", "Stopping foreground");
+                        Log.d("-State_Paused", "Stopping foreground");
                         break;
 
                     case PlaybackStateCompat.STATE_STOPPED:
-                        Log.d("State_Stopped", "Stopping session");
+                        Log.d("-State_Stopped", "Stopping session");
                         break;
 
                     case PlaybackStateCompat.STATE_ERROR:
-                        Log.d("State_Error", "Error");
+                        Log.d("-State_Error", "Error");
                         break;
                 }
             }
@@ -225,7 +254,13 @@ public class MyMediaPlayer extends Service {
         return mediaSession;
     }
 
+
+//    ----------------------------------------------------------------------------------------------
+//    Lifecycle & Release Methods here
+//    ----------------------------------------------------------------------------------------------
+
 //    Releases all key data objects
+//    (audio focus, media session, instance)
     public static void releaseAll() {
         AudioFocusHelper.release();
 
@@ -233,15 +268,16 @@ public class MyMediaPlayer extends Service {
         mediaSession.release();
         mediaSession = null;
 
-        instance.release();
-        instance = null;
-
+//        instance.release();
+//        instance = null;
     }
 
+//    Release all objects when service is destroyed
     @Override
     public void onDestroy() {
-        Log.d("On Destroy: MyMediaPlayer", "Service destroyed");
+        Log.d("-On Destroy: MyMediaPlayer", "Service destroyed");
         releaseAll();
         super.onDestroy();
     }
+
 }

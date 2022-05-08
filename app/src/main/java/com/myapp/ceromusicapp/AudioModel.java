@@ -31,5 +31,7 @@ public class AudioModel implements Serializable {
         if (artist.equals("<unknown>")) {
             return "Unknown artist";
         }
-        return artist; }
+        return artist;
+    }
+
 }

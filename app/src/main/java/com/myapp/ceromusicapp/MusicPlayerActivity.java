@@ -11,7 +11,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
+import com.myapp.ceromusicapp.Helpers.MediaPlayerHelper;
+
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +25,6 @@ public class MusicPlayerActivity extends AppCompatActivity {
     private ImageView shuffleButton;
     private ImageView repeatButton;
     private final MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
-    private final ArrayList<AudioModel> songList = MyMediaPlayer.getSongList();
     private AudioModel currentSong;
     private int degrees = 0;
     private boolean shuffleOn;
@@ -101,6 +101,11 @@ public class MusicPlayerActivity extends AppCompatActivity {
 
     }
 
+
+//    ----------------------------------------------------------------------------------------------
+//    Update View Methods here
+//    ----------------------------------------------------------------------------------------------
+
     void setResourcesWithMusic() {
         currentSong = MyMediaPlayer.currentSong;
         titleView.setText(currentSong.getTitle());
@@ -108,6 +113,18 @@ public class MusicPlayerActivity extends AppCompatActivity {
         totalTimeView.setText(convertToMMSS(currentSong.getDuration()));
         seekbar.setMax(mediaPlayer.getDuration());
     }
+
+    public static String convertToMMSS(String duration) {
+        long millis = Long.parseLong(duration);
+        return String.format(Locale.US, "%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
+    }
+
+
+//    ----------------------------------------------------------------------------------------------
+//    Shuffle & Repeat Methods here
+//    ----------------------------------------------------------------------------------------------
 
     private void loadShuffleAndRepeatStates() {
         sp = getSharedPreferences("myMusicPlayerSettings", Context.MODE_PRIVATE);
@@ -136,7 +153,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
             shuffleButton.setImageResource(R.drawable.ic_baseline_shuffle_24);
             shuffleOn = false;
         }
-        setShuffleFunctionality();
+        MediaPlayerHelper.setShuffleFunctionality(shuffleOn);
     }
 
 //    Toggle between repeat off, repeat all, and repeat one modes
@@ -154,38 +171,9 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 repeatButton.setImageResource(R.drawable.ic_baseline_repeat_24);
                 repeatMode = 0;
         }
-        setRepeatFunctionality();
+        MediaPlayerHelper.setRepeatFunctionality(repeatMode);
     }
 
-    private void setShuffleFunctionality() {
-    }
-
-//    Sets functionality according to repeatMode
-//    0: no repeat 1: repeat all songs 2: repeat current song
-    private void setRepeatFunctionality() {
-        switch (repeatMode) {
-            case 0:
-                mediaPlayer.setOnCompletionListener(mediaPlayer -> MyMediaPlayer.playNextSong());
-                return;
-            case 1:
-                mediaPlayer.setOnCompletionListener(mediaPlayer -> {
-                    if (MyMediaPlayer.currentIndex == songList.size()-1) {
-                        MyMediaPlayer.currentIndex = -1;
-                    }
-                        MyMediaPlayer.playNextSong();
-                });
-                return;
-            case 2:
-                mediaPlayer.setOnCompletionListener(mediaPlayer -> MyMediaPlayer.startSong());
-        }
-    }
-
-    public static String convertToMMSS(String duration) {
-        long millis = Long.parseLong(duration);
-        return String.format(Locale.US, "%02d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-    }
 
 //    ----------------------------------------------------------------------------------------------
 //    Lifecycle Methods here

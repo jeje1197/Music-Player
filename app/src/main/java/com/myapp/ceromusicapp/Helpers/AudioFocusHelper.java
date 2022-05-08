@@ -40,24 +40,24 @@ public class AudioFocusHelper {
 
                 switch (i) {
                     case AudioManager.AUDIOFOCUS_GAIN:
-                        Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_GAIN ------------------");
+                        Log.d("-AudioFocusChangeListener", "------------------ AUDIOFOCUS_GAIN ------------------");
                         mediaPlayer.setVolume(1f, 1f);
                         startPlayer();
                         break;
 
                     case AudioManager.AUDIOFOCUS_LOSS:
-                        Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS ------------------");
+                        Log.d("-AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS ------------------");
                         pausePlayer();
                         break;
 
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                        Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS_TRANSIENT " +
+                        Log.d("-AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS_TRANSIENT " +
                                 "------------------");
                         pausePlayer();
                         break;
 
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                        Log.d("AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS_TRANSIENT " +
+                        Log.d("-AudioFocusChangeListener", "------------------ AUDIOFOCUS_LOSS_TRANSIENT " +
                                 "------------------");
                         if (mediaPlayer.isPlaying()) {
                             mediaPlayer.setVolume(0.3f, 0.3f);

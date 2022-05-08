@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -23,6 +24,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.myapp.ceromusicapp.Helpers.MediaPlayerHelper;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -31,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
     TextView noMusicTextView, minibarTextView, minibarArtistView;
-    ArrayList<AudioModel> songList = MyMediaPlayer.getSongList();
+    ArrayList<AudioModel> deviceSongList = MyMediaPlayer.getOriginalList();
     MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
     int savedPosition;
     SharedPreferences sp;
@@ -62,8 +65,8 @@ public class MainActivity extends AppCompatActivity {
         ImageView infoButton = findViewById(R.id.informationButton);
         infoButton.setOnClickListener(view -> displayAppInfo());
 
-        //        setShuffleFunctionality(shuffleOn);
-        setRepeatFunctionality(repeatMode);
+        MediaPlayerHelper.setShuffleFunctionality(shuffleOn);
+        MediaPlayerHelper.setRepeatFunctionality(repeatMode);
 
 //        Check & request permissions
         if(!checkForPermission()) {
@@ -77,46 +80,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //        Get songs from device
-    private void getSongsFromDevice() {
-        String[] projection = {
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.ARTIST
-        };
-
-        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
-
-        Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection, selection, null, MediaStore.Audio.Media.TITLE + " COLLATE NOCASE ASC");
-
-        while (cursor.moveToNext()) {
-            AudioModel songData = new AudioModel(cursor.getString(1), cursor.getString(0),
-                    cursor.getString(2), cursor.getString(3));
-            if(new File(songData.getPath()).exists()) {
-                songList.add(songData);
-            }
-        }
-        cursor.close();
-
-        //        Set up recycler view
-        if(songList.size() == 0) {
-            noMusicTextView.setVisibility(View.VISIBLE);
-        } else {
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(new MusicListAdapter(songList, getApplicationContext()));
-            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                    savedPosition = linearLayoutManager.findFirstVisibleItemPosition();
-                }
-            });
-            recyclerView.scrollToPosition(savedPosition);
-        }
-    }
+//    ----------------------------------------------------------------------------------------------
+//    Permission Methods here
+//    ----------------------------------------------------------------------------------------------
 
     boolean checkForPermission() {
         int result = ContextCompat.checkSelfPermission(MainActivity.this,
@@ -141,19 +107,67 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ------------------------------------
 
-    private void displayAppInfo() {
-        MyDialog infoDialog = new MyDialog();
-        infoDialog.show(getSupportFragmentManager(), "Information Dialog");
+//    ----------------------------------------------------------------------------------------------
+//    Device Query & RecyclerView Methods here
+//    ----------------------------------------------------------------------------------------------
+
+    //  Get songs from device & setup recycler view
+    private void getSongsFromDevice() {
+        if (deviceSongList.size() > 0) {
+            Log.d("-getSongsFromDevice", "Getting songs from device!");
+            String[] projection = {
+                    MediaStore.Audio.Media.TITLE,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.DURATION,
+                    MediaStore.Audio.Media.ARTIST
+            };
+
+            String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+
+            Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    projection, selection, null, MediaStore.Audio.Media.TITLE + " COLLATE NOCASE ASC");
+
+            while (cursor.moveToNext()) {
+                AudioModel songData = new AudioModel(cursor.getString(1), cursor.getString(0),
+                        cursor.getString(2), cursor.getString(3));
+                if(new File(songData.getPath()).exists()) {
+                    deviceSongList.add(songData);
+                }
+            }
+            cursor.close();
+            MediaPlayerHelper.createShuffledPlaylist(deviceSongList);
+        }
+
+        //  Set up recycler view with songs
+        if(deviceSongList.size() == 0) {
+            noMusicTextView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(new MusicListAdapter(deviceSongList, getApplicationContext()));
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    savedPosition = linearLayoutManager.findFirstVisibleItemPosition();
+                }
+            });
+            recyclerView.scrollToPosition(savedPosition);
+        }
     }
 
     private void updateRecyclerView() {
         if (recyclerView != null) {
-            recyclerView.setAdapter(new MusicListAdapter(songList, getApplicationContext()));
-                recyclerView.scrollToPosition(savedPosition);
+            recyclerView.setAdapter(new MusicListAdapter(deviceSongList, getApplicationContext()));
+            recyclerView.scrollToPosition(savedPosition);
         }
     }
+
+
+//    ----------------------------------------------------------------------------------------------
+//    Minibar & Helper Methods here
+//    ----------------------------------------------------------------------------------------------
 
     private String getCurrentSongTitle() {
         if (MyMediaPlayer.currentIndex == -1) {
@@ -175,31 +189,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
-
-    // -------------------
-    private void setShuffleFunctionality() {
-    }
-
-    //    Sets functionality according to repeatMode
-//    0: no repeat 1: repeat all songs 2: repeat current song
-    private void setRepeatFunctionality(int repeatMode) {
-        switch (repeatMode) {
-            case 0:
-                mediaPlayer.setOnCompletionListener(mediaPlayer -> MyMediaPlayer.playNextSong());
-                return;
-            case 1:
-                mediaPlayer.setOnCompletionListener(mediaPlayer -> {
-                    if (MyMediaPlayer.currentIndex == MyMediaPlayer.songList.size()-1) {
-                        MyMediaPlayer.currentIndex = -1;
-                    }
-                    MyMediaPlayer.playNextSong();
-                });
-                return;
-            case 2:
-                mediaPlayer.setOnCompletionListener(mediaPlayer -> MyMediaPlayer.startSong());
-        }
-    }
-    // -------------------
 
 //    Set up mini bar to marquee
     private void setupMinibar() {
@@ -241,6 +230,17 @@ public class MainActivity extends AppCompatActivity {
         minibarTextView.setOnClickListener(view -> goToCurrentSongView());
     }
 
+
+//    ----------------------------------------------------------------------------------------------
+//    Information Methods here
+//    ----------------------------------------------------------------------------------------------
+
+    private void displayAppInfo() {
+        MyDialog infoDialog = new MyDialog();
+        infoDialog.show(getSupportFragmentManager(), "Information Dialog");
+    }
+
+
 //    ----------------------------------------------------------------------------------------------
 //    Lifecycle Methods here
 //    ----------------------------------------------------------------------------------------------
@@ -266,8 +266,4 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 }

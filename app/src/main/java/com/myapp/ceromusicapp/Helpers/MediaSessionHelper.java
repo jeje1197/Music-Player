@@ -23,6 +23,10 @@ public class MediaSessionHelper {
     private static MediaMetadataCompat.Builder metadataBuilder;
     private static final String CHANNEL_ID = "channel1";
 
+//    ----------------------------------------------------------------------------------------------
+//    Channel & Notification Methods here
+//    ----------------------------------------------------------------------------------------------
+
 //    Creates a notification channel
     public static void createChannel(Context context) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -86,6 +90,10 @@ public class MediaSessionHelper {
     }
 
 
+//    ----------------------------------------------------------------------------------------------
+//    Update Metadata & Playback Methods here
+//    ----------------------------------------------------------------------------------------------
+
     public static void updatePlaybackState(MediaSessionCompat mediaSession, int state) {
         if (playbackBuilder == null) {
             playbackBuilder = new PlaybackStateCompat.Builder();
@@ -108,4 +116,5 @@ public class MediaSessionHelper {
 
         mediaSession.setMetadata(metadataBuilder.build());
     }
+
 }
