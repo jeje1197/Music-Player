@@ -53,7 +53,14 @@ public class MyMediaPlayer extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        MediaButtonReceiver.handleIntent(mediaSession, intent);
+        Log.d("-Media Player Service onStart()", "Nice call");
+
+        if (intent != null) {
+            MediaButtonReceiver.handleIntent(mediaSession, intent);
+        }
+
+//        startForeground(1, MediaSessionHelper.getNotification(this,mediaSession,
+//                true).build());
         return START_STICKY;
     }
 
@@ -262,11 +269,11 @@ public class MyMediaPlayer extends Service {
 //    Releases all key data objects
 //    (audio focus, media session, instance)
     public static void releaseAll() {
-        AudioFocusHelper.release();
+//        AudioFocusHelper.release();
 
-        mediaSession.setActive(false);
-        mediaSession.release();
-        mediaSession = null;
+//        mediaSession.setActive(false);
+//        mediaSession.release();
+//        mediaSession = null;
 
 //        instance.release();
 //        instance = null;

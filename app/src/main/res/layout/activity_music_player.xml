@@ -34,6 +34,8 @@
         android:layout_centerHorizontal="true"
         android:ellipsize="end"
         android:maxLines="1"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:text="Artist of the song"
         android:textAlignment="center"
         android:textColor="@color/white"

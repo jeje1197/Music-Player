@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
     //  Get songs from device & setup recycler view
     private void getSongsFromDevice() {
-        if (deviceSongList.size() > 0) {
+        if (deviceSongList.size() == 0) {
             Log.d("-getSongsFromDevice", "Getting songs from device!");
             String[] projection = {
                     MediaStore.Audio.Media.TITLE,
@@ -223,12 +223,10 @@ public class MainActivity extends AppCompatActivity {
 
         miniPreviousButton.setOnClickListener(view -> {
             MyMediaPlayer.playPreviousSong();
-            updateRecyclerView();
         });
         miniPausePlayButton.setOnClickListener(view -> MyMediaPlayer.pausePlay());
         miniNextButton.setOnClickListener(view -> {
             MyMediaPlayer.playNextSong();
-            updateRecyclerView();
         });
         minibarTextView.setOnClickListener(view -> goToCurrentSongView());
     }
