@@ -15,7 +15,7 @@
         android:theme="@style/splashScreenTheme">
         <activity
             android:name=".MusicPlayerActivity"
-            android:exported="false"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
             android:soundEffectsEnabled="false"/>
