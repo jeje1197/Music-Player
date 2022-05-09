@@ -50,8 +50,7 @@ public class MediaSessionHelper {
         Intent contentIntent2 = new Intent(context, MusicPlayerActivity.class);
 
         PendingIntent contentPendingIntent = PendingIntent.getActivities(context, 0,
-                new Intent[]{contentIntent1, contentIntent2}, PendingIntent.FLAG_UPDATE_CURRENT |
-                        PendingIntent.FLAG_IMMUTABLE);
+                new Intent[]{contentIntent1, contentIntent2}, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Action skipPreviousAction = new NotificationCompat.Action(R.drawable.mini_previous, "Previous",
                 MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS));
