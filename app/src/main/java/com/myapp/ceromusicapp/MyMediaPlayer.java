@@ -60,7 +60,7 @@ public class MyMediaPlayer extends Service {
         } else {
             MediaButtonReceiver.handleIntent(mediaSession, intent);
             if (intent.hasExtra(START_SONG)) {
-
+                startSong();
             } else if (intent.hasExtra(START_FOREGROUND)){
                 startForeground(1, MediaSessionHelper.getNotification(this, mediaSession,
                         true));
