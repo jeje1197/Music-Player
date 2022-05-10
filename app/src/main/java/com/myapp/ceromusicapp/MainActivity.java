@@ -33,6 +33,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
+    MusicListAdapter adapter;
+
     TextView noMusicTextView, minibarTextView, minibarArtistView;
     ArrayList<AudioModel> deviceSongList = MyMediaPlayer.getOriginalList();
     MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
@@ -147,7 +149,9 @@ public class MainActivity extends AppCompatActivity {
             noMusicTextView.setVisibility(View.VISIBLE);
         } else {
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(new MusicListAdapter(deviceSongList, getApplicationContext()));
+            adapter = new MusicListAdapter(deviceSongList, this);
+            recyclerView.setAdapter(adapter);
+            recyclerView.setItemAnimator(null);
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 @Override
@@ -162,8 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateRecyclerView() {
         if (recyclerView != null) {
-            recyclerView.setAdapter(new MusicListAdapter(deviceSongList, getApplicationContext()));
-            recyclerView.scrollToPosition(savedPosition);
+            adapter.updateSelected();
         }
     }
 

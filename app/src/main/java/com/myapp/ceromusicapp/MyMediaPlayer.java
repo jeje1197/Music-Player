@@ -287,10 +287,10 @@ public class MyMediaPlayer extends Service {
 //    Releases all key data objects
 //    (audio focus, media session, instance)
     public static void releaseAll() {
-//        AudioFocusHelper.release();
+        AudioFocusHelper.release();
 //
-//        mediaSession.setActive(false);
-//        mediaSession.release();
+        mediaSession.setActive(false);
+        mediaSession.release();
 //        mediaSession = null;
 
 //        instance.release();
@@ -301,7 +301,7 @@ public class MyMediaPlayer extends Service {
     @Override
     public void onDestroy() {
         Log.d("-On Destroy: MyMediaPlayer", "Service destroyed");
-//        releaseAll();
+        releaseAll();
         super.onDestroy();
 //        Log.d("-On Destroy: MyMediaPlayer",
 //                String.format(

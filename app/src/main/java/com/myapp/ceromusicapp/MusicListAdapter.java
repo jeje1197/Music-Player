@@ -3,7 +3,6 @@ package com.myapp.ceromusicapp;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +19,13 @@ import java.util.ArrayList;
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.ViewHolder>{
 
     ArrayList<AudioModel> songList;
+    int indexOfLastSelected;
     Context context;
 
     public MusicListAdapter(ArrayList<AudioModel> songsList, Context context) {
         this.songList = songsList;
         this.context = context;
+        this.indexOfLastSelected = -1;
     }
 
     @NonNull
@@ -65,6 +66,15 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     @Override
     public int getItemCount() {
         return songList.size();
+    }
+
+    public int getIndexOfLastSelected() { return indexOfLastSelected; }
+
+    public void updateSelected() {
+        if (indexOfLastSelected >= 0)
+            notifyItemChanged(indexOfLastSelected);
+        notifyItemChanged(MyMediaPlayer.currentIndex);
+        indexOfLastSelected = MyMediaPlayer.currentIndex;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
