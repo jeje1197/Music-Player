@@ -221,13 +221,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        miniPreviousButton.setOnClickListener(view -> {
-            MyMediaPlayer.playPreviousSong();
-        });
+        miniPreviousButton.setOnClickListener(view -> MyMediaPlayer.playPreviousSong());
         miniPausePlayButton.setOnClickListener(view -> MyMediaPlayer.pausePlay());
-        miniNextButton.setOnClickListener(view -> {
-            MyMediaPlayer.playNextSong();
-        });
+        miniNextButton.setOnClickListener(view -> MyMediaPlayer.playNextSong());
         minibarTextView.setOnClickListener(view -> goToCurrentSongView());
     }
 

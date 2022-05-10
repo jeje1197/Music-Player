@@ -34,7 +34,7 @@ public class MediaPlayerHelper {
             MyMediaPlayer.currentIndex = MyMediaPlayer.originalList.indexOf(MyMediaPlayer.currentSong);
         }
 
-        Log.d("-setShuffleFunctionality", "shuffleOn: " + shuffleOn);
+        Log.d("-setShuffleFunctionality", "shuffle: " + (shuffleOn ? "on":"off"));
     }
 
 //    Sets how repeat should work

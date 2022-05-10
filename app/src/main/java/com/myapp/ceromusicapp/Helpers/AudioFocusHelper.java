@@ -15,7 +15,8 @@ public class AudioFocusHelper {
     private static final MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
 
     public static void initializeAudioManager(Context context) {
-        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager == null)
+            audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     public static boolean isAudioFocusGranted() {

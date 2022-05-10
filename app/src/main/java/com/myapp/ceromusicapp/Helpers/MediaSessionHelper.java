@@ -1,5 +1,6 @@
 package com.myapp.ceromusicapp.Helpers;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -23,13 +24,13 @@ public class MediaSessionHelper {
     private static MediaMetadataCompat.Builder metadataBuilder;
     private static final String CHANNEL_ID = "channel1";
 
+
 //    ----------------------------------------------------------------------------------------------
 //    Channel & Notification Methods here
 //    ----------------------------------------------------------------------------------------------
 
 //    Creates a notification channel
-    public static void createChannel(Context context) {
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    public static void createChannel(NotificationManager manager) {
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "General",
                 NotificationManager.IMPORTANCE_HIGH);
         channel.setShowBadge(false);
@@ -39,8 +40,8 @@ public class MediaSessionHelper {
     }
 
 //    Create a notification from the data stored in the MediaSession's metadata
-    public static NotificationCompat.Builder getNotification(Context context, MediaSessionCompat mediaSession,
-                                                             boolean playing) {
+    public static Notification getNotification(Context context, MediaSessionCompat mediaSession,
+                                               boolean playing) {
 
         MediaControllerCompat mediaController = mediaSession.getController();
         MediaMetadataCompat metadata = mediaController.getMetadata();
@@ -52,7 +53,9 @@ public class MediaSessionHelper {
         PendingIntent contentPendingIntent = PendingIntent.getActivities(context, 0,
                 new Intent[]{contentIntent1, contentIntent2}, PendingIntent.FLAG_IMMUTABLE);
 
-        NotificationCompat.Action skipPreviousAction = new NotificationCompat.Action(R.drawable.mini_previous, "Previous",
+        NotificationCompat.Action skipPreviousAction = new NotificationCompat.Action(
+                R.drawable.mini_previous,
+                "Previous",
                 MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS));
 
         NotificationCompat.Action pausedAction = new NotificationCompat.Action(
@@ -84,7 +87,8 @@ public class MediaSessionHelper {
                     .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setShowActionsInCompactView(0, 1, 2)
                             .setMediaSession(mediaSession.getSessionToken())
-                    );
+                    )
+                    .build();
 
     }
 

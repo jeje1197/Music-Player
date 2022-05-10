@@ -30,6 +30,8 @@ public class MyMediaPlayer extends Service {
     public static MediaSessionCompat mediaSession;
     private static NotificationManager notificationManager;
 
+    public final static String START_FOREGROUND = "Start Foreground";
+    public final static String START_SONG = "Start Song";
 
     @Nullable
     @Override
@@ -43,24 +45,39 @@ public class MyMediaPlayer extends Service {
         super.onCreate();
         Log.d("-Media Player Service onCreate()",
                 "mediaPlayer: " + instance);
-
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        MediaSessionHelper.createChannel(this);
+        MediaSessionHelper.createChannel(notificationManager);
         mediaSession = initializeMediaSession(this);
         AudioFocusHelper.initializeAudioManager(this);
-        startSong();
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("-Media Player Service onStart()", "Nice call");
-
-        if (intent != null) {
+        if (intent == null) {
+            startForeground(1, MediaSessionHelper.getNotification(this, mediaSession,
+                    true));
+        } else {
             MediaButtonReceiver.handleIntent(mediaSession, intent);
+            if (intent.hasExtra(START_SONG)) {
+
+            } else if (intent.hasExtra(START_FOREGROUND)){
+                startForeground(1, MediaSessionHelper.getNotification(this, mediaSession,
+                        true));
+            }
         }
 
-//        startForeground(1, MediaSessionHelper.getNotification(this,mediaSession,
-//                true).build());
+//        Log.d("-Media Player Service onStart()", "" + intent);
+//        Log.d("-", String.format(
+//                "Media player: %s\n" +
+//                        "Current List: %s\n" +
+//                        "Current Index: %s\n" +
+//                        "Current Song: %s\n" +
+//                        "Media Session: %s\n" +
+//                        "Notification Manager: %s\n",
+//                instance, currentList!=null ? "initialized!":"null", currentIndex, currentSong,
+//                mediaSession, notificationManager));
+
         return START_STICKY;
     }
 
@@ -91,9 +108,7 @@ public class MyMediaPlayer extends Service {
 //    Sets current song, updates metadata, requests audio focus,
 //    starts the media player and updates playback state.
     public static void startSong() {
-        Log.d("-startSong()",
-                "mediaPlayer: " + instance +
-                "currentIndex: " + currentIndex);
+//        MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_CONNECTING);
 
         currentSong = currentList.get(currentIndex);
         instance.reset();
@@ -231,21 +246,24 @@ public class MyMediaPlayer extends Service {
 
                 switch (state.getState()) {
                     case PlaybackStateCompat.STATE_PLAYING:
-                        startForeground(1, MediaSessionHelper.getNotification(context, mediaSession,
-                                true).build());
-                        Log.d("-State_Playing", "Starting foreground");
+                        Intent intent = new Intent(getApplicationContext(), MyMediaPlayer.class)
+                                .putExtra(START_FOREGROUND, "Start_Foreground");
+                        startForegroundService(intent);
+
+                        Log.d("-State_Playing", "Starting foreground service");
                         break;
 
                     case PlaybackStateCompat.STATE_PAUSED:
                         notificationManager.notify(1, MediaSessionHelper.getNotification(context, mediaSession,
-                                false)
-                        .build());
+                                false));
                         stopForeground(false);
 
                         Log.d("-State_Paused", "Stopping foreground");
                         break;
 
                     case PlaybackStateCompat.STATE_STOPPED:
+                        stopForeground(false);
+                        stopSelf();
                         Log.d("-State_Stopped", "Stopping session");
                         break;
 
@@ -270,7 +288,7 @@ public class MyMediaPlayer extends Service {
 //    (audio focus, media session, instance)
     public static void releaseAll() {
 //        AudioFocusHelper.release();
-
+//
 //        mediaSession.setActive(false);
 //        mediaSession.release();
 //        mediaSession = null;
@@ -285,6 +303,18 @@ public class MyMediaPlayer extends Service {
         Log.d("-On Destroy: MyMediaPlayer", "Service destroyed");
 //        releaseAll();
         super.onDestroy();
+//        Log.d("-On Destroy: MyMediaPlayer",
+//                String.format(
+//                        "Media player: %s\n" +
+//                        "Current List: %s\n" +
+//                        "Current Index: %s\n" +
+//                        "Current Song: %s\n" +
+//                        "Current Position: %s\n" +
+//                        "Media Session: %s\n" +
+//                        "Notification Manager: %s\n",
+//                        instance, currentList, currentIndex, currentSong,
+//                        instance.getCurrentPosition(), mediaSession, notificationManager)
+//        );
     }
 
 }
