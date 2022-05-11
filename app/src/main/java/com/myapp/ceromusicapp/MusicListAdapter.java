@@ -43,7 +43,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         holder.artistTextView.setText(songData.getArtist());
         holder.durationTextView.setText(MediaPlayerHelper.convertToMMSS(songData.getDuration()));
 
-        if (MyMediaPlayer.currentIndex == holder.getAdapterPosition()) {
+        if (MyMediaPlayer.currentSong == songData) {
             holder.titleTextView.setTextColor(Color.parseColor("#FF0000"));
         } else {
             holder.titleTextView.setTextColor(Color.parseColor("#000000"));
@@ -51,7 +51,16 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
         holder.itemView.setOnClickListener(view -> {
 //            Set current song index to clicked adapter position
-            MyMediaPlayer.currentIndex = holder.getAdapterPosition();
+//            If song is selected from the original unfiltered list,
+//            then index = holder position, otherwise if it's from
+//            a filtered list, you have to search the original list
+//            to get the right index to play from
+            if (songList == MyMediaPlayer.originalList) {
+                MyMediaPlayer.currentIndex = holder.getAdapterPosition();
+            } else {
+                MyMediaPlayer.currentIndex = MyMediaPlayer.originalList.indexOf(songData);
+            }
+
             context.startService(
                     new Intent(context, MyMediaPlayer.class)
                             .putExtra(MyMediaPlayer.START_SONG, true)
@@ -91,7 +100,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
     @SuppressLint("NotifyDataSetChanged")
     public void filterList(ArrayList<AudioModel> filteredList) {
-        songList = filteredList;
-        notifyDataSetChanged();
+        if (songList != filteredList) {
+            songList = filteredList;
+            notifyDataSetChanged();
+        }
     }
+
 }

@@ -18,10 +18,13 @@ public class MediaPlayerHelper {
 
 //    Creates a new shuffled list from the parameter
 //    and saves it inside of MyMediaPlayer.shuffledList
+//    Runs on thread
     public static void createShuffledPlaylist(ArrayList<AudioModel> unshuffledList) {
-        MyMediaPlayer.shuffledList = new ArrayList<>(unshuffledList);
-        Collections.shuffle(MyMediaPlayer.shuffledList);
-        Log.d("-createShuffledPlaylist", "Created shuffled list");
+        new Thread(() -> {
+            MyMediaPlayer.shuffledList = new ArrayList<>(unshuffledList);
+            Collections.shuffle(MyMediaPlayer.shuffledList);
+            Log.d("-createShuffledPlaylist", "Created shuffled list");
+        }).start();
     }
 
 //    Sets current playlist = shuffled list if shuffleOn = true

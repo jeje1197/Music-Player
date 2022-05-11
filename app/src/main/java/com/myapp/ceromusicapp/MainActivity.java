@@ -14,6 +14,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -257,11 +258,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupSearchButton() {
         searchButton.setOnClickListener(l -> {
-            if (searchEditText.getVisibility() == View.GONE) {
-                searchEditText.setVisibility(View.VISIBLE);
-            } else {
-                searchEditText.setVisibility(View.GONE);
-            }
+            toggleSearchVisibility();
         });
     }
 
@@ -282,20 +279,63 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void filter(String s) {
-        ArrayList<AudioModel> filteredList = new ArrayList<>();
-
-        for(AudioModel song: deviceSongList) {
-            if(song.getTitle().toLowerCase().contains(s)) {
-                filteredList.add(song);
-            }
+    private void filter(String text) {
+        if (text.equals("")) {
+            adapter.filterList(deviceSongList);
+            return;
         }
 
-        adapter.filterList(filteredList);
+//        Run on thread so search input is more responsive
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<AudioModel> filteredList = new ArrayList<>();
+
+                for(AudioModel song: deviceSongList) {
+                    if(song.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                        filteredList.add(song);
+                    }
+                }
+
+                adapter.filterList(filteredList);
+            }
+        });
+
+
     }
 
+    private void toggleSearchVisibility() {
+        if (searchEditText.getVisibility() == View.GONE) {
+            searchEditText.setVisibility(View.VISIBLE);
+            searchButton.setImageResource(R.drawable.ic_baseline_search_off_24);
+        } else {
+            searchEditText.setVisibility(View.GONE);
+            searchButton.setImageResource(R.drawable.ic_baseline_search_24);
+            hideKeyboard();
+            if (!searchEditText.getText().equals(""))
+                searchEditText.setText("");
+        }
+    }
 
-//    ----------------------------------------------------------------------------------------------
+    private void hideKeyboard() {
+//        View view = searchEditText;
+        if (searchEditText != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
+        }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (searchEditText.getVisibility() == View.VISIBLE) {
+            toggleSearchVisibility();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    //    ----------------------------------------------------------------------------------------------
 //    Lifecycle Methods here
 //    ----------------------------------------------------------------------------------------------
 
