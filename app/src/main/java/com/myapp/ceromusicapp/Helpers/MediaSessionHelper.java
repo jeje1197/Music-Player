@@ -32,7 +32,7 @@ public class MediaSessionHelper {
 //    Creates a notification channel
     public static void createChannel(NotificationManager manager) {
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "General",
-                NotificationManager.IMPORTANCE_HIGH);
+                NotificationManager.IMPORTANCE_LOW);
         channel.setShowBadge(false);
         if (manager != null) {
             manager.createNotificationChannel(channel);
@@ -75,7 +75,6 @@ public class MediaSessionHelper {
                     .setContentTitle(description.getTitle())
                     .setContentText(description.getSubtitle())
                     .setSmallIcon(R.drawable.music_icon_compress)
-                    .setSilent(true)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setContentIntent(contentPendingIntent)
                     .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,

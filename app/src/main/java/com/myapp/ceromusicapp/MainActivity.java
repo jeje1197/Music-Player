@@ -10,8 +10,11 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -36,12 +39,14 @@ public class MainActivity extends AppCompatActivity {
     MusicListAdapter adapter;
 
     TextView noMusicTextView, minibarTextView, minibarArtistView;
+    EditText searchEditText;
     ArrayList<AudioModel> deviceSongList = MyMediaPlayer.getOriginalList();
     MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
     int savedPosition;
     SharedPreferences sp;
     RelativeLayout minibarLayout;
-    ImageView miniPreviousButton, miniPausePlayButton, miniNextButton;
+    ImageView miniPreviousButton, miniPausePlayButton, miniNextButton,
+            searchButton;
     static boolean isActive = false;
 
     @Override
@@ -59,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
         miniPreviousButton = findViewById(R.id.mini_previous);
         miniPausePlayButton = findViewById(R.id.mini_pause_play);
         miniNextButton = findViewById(R.id.mini_next);
+        searchButton = findViewById(R.id.search_button);
+        searchEditText = findViewById(R.id.search_edit_text);
+
 
 //        Load user preferences
 //        Shuffle/Repeat states & screen position
@@ -79,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getSongsFromDevice();
         }
+
+        setupSearchButton();
+        setupSearchEditText();
 
         setupMinibar();
         setupMinibarButtons();
@@ -238,6 +249,49 @@ public class MainActivity extends AppCompatActivity {
     private void displayAppInfo() {
         MyDialog infoDialog = new MyDialog();
         infoDialog.show(getSupportFragmentManager(), "Information Dialog");
+    }
+
+//    ----------------------------------------------------------------------------------------------
+//    Search Methods here
+//    ----------------------------------------------------------------------------------------------
+
+    private void setupSearchButton() {
+        searchButton.setOnClickListener(l -> {
+            if (searchEditText.getVisibility() == View.GONE) {
+                searchEditText.setVisibility(View.VISIBLE);
+            } else {
+                searchEditText.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void setupSearchEditText() {
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                filter(editable.toString());
+            }
+        });
+    }
+
+    private void filter(String s) {
+        ArrayList<AudioModel> filteredList = new ArrayList<>();
+
+        for(AudioModel song: deviceSongList) {
+            if(song.getTitle().toLowerCase().contains(s)) {
+                filteredList.add(song);
+            }
+        }
+
+        adapter.filterList(filteredList);
     }
 
 

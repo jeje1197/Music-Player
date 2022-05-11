@@ -7,26 +7,50 @@
     android:background="@color/purple_200"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/songs_text"
-        android:textColor="@color/black"
-        android:text="SONGS"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="10dp"
-        android:layout_centerHorizontal="true"/>
-
     <ImageView
+        android:id="@+id/search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/informationButton"
-        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:contentDescription="App Information"
+        android:paddingLeft="8dp"
         android:paddingTop="7dp"
         android:paddingRight="8dp"
-        android:src="@drawable/ic_baseline_info_24"
-        android:contentDescription="App Information" />
+        android:src="@drawable/ic_baseline_search_24" />
+
+    <TextView
+        android:id="@+id/songs_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:padding="10dp"
+        android:text="SONGS"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/search_edit_text"
+        android:layout_below="@id/songs_text"
+        android:padding="5dp"
+        android:hint="Search"
+        android:textSize="26sp"
+        android:background="@color/white"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/informationButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="App Information"
+        android:paddingLeft="8dp"
+        android:paddingTop="7dp"
+        android:paddingRight="8dp"
+        android:src="@drawable/ic_baseline_info_24" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/minibar_layout"
-        android:layout_below="@id/songs_text"
+        android:layout_below="@id/search_edit_text"
         android:scrollbars="vertical" />
 
     <RelativeLayout
@@ -60,7 +84,7 @@
             android:id="@+id/mini_current_song"
             android:text="No Song Selected"
             android:textColor="@color/black"
-            android:textSize="16dp"
+            android:textSize="16sp"
             android:textAlignment="center"
             android:ellipsize="marquee"
             android:layout_toStartOf="@id/mini_previous"
@@ -86,7 +110,7 @@
             android:id="@+id/mini_previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/mini_pause_play"
+            android:layout_toStartOf="@id/mini_pause_play"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_baseline_skip_previous_24" />
 
@@ -94,7 +118,7 @@
             android:id="@+id/mini_pause_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/mini_next"
+            android:layout_toStartOf="@+id/mini_next"
             android:src="@drawable/ic_baseline_play_circle_outline_24" />
 
         <ImageView

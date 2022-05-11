@@ -1,5 +1,6 @@
 package com.myapp.ceromusicapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -63,20 +64,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         });
     }
 
-    @Override
-    public int getItemCount() {
-        return songList.size();
-    }
-
-    public int getIndexOfLastSelected() { return indexOfLastSelected; }
-
-    public void updateSelected() {
-        if (indexOfLastSelected >= 0)
-            notifyItemChanged(indexOfLastSelected);
-        notifyItemChanged(MyMediaPlayer.currentIndex);
-        indexOfLastSelected = MyMediaPlayer.currentIndex;
-    }
-
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
         TextView titleTextView, artistTextView, durationTextView;
@@ -90,4 +77,21 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         }
     }
 
+    @Override
+    public int getItemCount() {
+        return songList.size();
+    }
+
+    public void updateSelected() {
+        if (indexOfLastSelected >= 0)
+            notifyItemChanged(indexOfLastSelected);
+        notifyItemChanged(MyMediaPlayer.currentIndex);
+        indexOfLastSelected = MyMediaPlayer.currentIndex;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterList(ArrayList<AudioModel> filteredList) {
+        songList = filteredList;
+        notifyDataSetChanged();
+    }
 }
