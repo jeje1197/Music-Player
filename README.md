@@ -11,15 +11,15 @@ Project Start: 4/26/2022
 Features:
 
 - List of Songs
+- Search functionality
 - Multiple aesthetic song displays w/ buttons
 - Shuffle & Repeat Functionality
-- Media Style Notifications
+- Media Style Notifications w/ Control Buttons
 - Works with Bluetooth Device Buttons
 - AudioFocus
 
 Future:
 - Remember Most Recently Played Song & Position After Closed
-- Update Recycler View To Show Current Song Colored Automatically
 - Playlist Creation
-- Accessibility (Text Size)
+- Accessibility
 - Choice of Theme (Background Color)
