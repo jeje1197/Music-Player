@@ -53,6 +53,9 @@ public class MediaSessionHelper {
         PendingIntent contentPendingIntent = PendingIntent.getActivities(context, 0,
                 new Intent[]{contentIntent1, contentIntent2}, PendingIntent.FLAG_IMMUTABLE);
 
+        PendingIntent deletePendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                PlaybackStateCompat.ACTION_STOP);
+
         NotificationCompat.Action skipPreviousAction = new NotificationCompat.Action(
                 R.drawable.mini_previous,
                 "Previous",
@@ -77,14 +80,14 @@ public class MediaSessionHelper {
                     .setSmallIcon(R.drawable.music_icon_compress)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setContentIntent(contentPendingIntent)
-                    .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-                            PlaybackStateCompat.ACTION_STOP)
-                    )
+                    .setDeleteIntent(deletePendingIntent)
                     .addAction(skipPreviousAction)
                     .addAction( playing ? playingAction : pausedAction)
                     .addAction(skipNextAction)
                     .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setShowActionsInCompactView(0, 1, 2)
+                            .setShowCancelButton(true)
+                            .setCancelButtonIntent(deletePendingIntent)
                             .setMediaSession(mediaSession.getSessionToken())
                     )
                     .build();

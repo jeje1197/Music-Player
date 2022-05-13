@@ -76,8 +76,6 @@ public class MainActivity extends AppCompatActivity {
         boolean shuffleOn = sp.getBoolean("shuffleOn", false);
         int repeatMode = sp.getInt("repeatMode", 0);
 
-        MediaPlayerHelper.setShuffleFunctionality(shuffleOn);
-        MediaPlayerHelper.setRepeatFunctionality(repeatMode);
 
         ImageView infoButton = findViewById(R.id.informationButton);
         infoButton.setOnClickListener(view -> displayAppInfo());
@@ -94,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
 
         setupMinibar();
         setupMinibarButtons();
+
+        MediaPlayerHelper.setShuffleFunctionality(shuffleOn);
+        MediaPlayerHelper.setRepeatFunctionality(repeatMode);
     }
 
 
@@ -169,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
+                    assert linearLayoutManager != null;
                     savedPosition = linearLayoutManager.findFirstVisibleItemPosition();
                 }
             });
@@ -257,9 +259,7 @@ public class MainActivity extends AppCompatActivity {
 //    ----------------------------------------------------------------------------------------------
 
     private void setupSearchButton() {
-        searchButton.setOnClickListener(l -> {
-            toggleSearchVisibility();
-        });
+        searchButton.setOnClickListener(l -> toggleSearchVisibility());
     }
 
     private void setupSearchEditText() {
@@ -286,21 +286,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
 //        Run on thread so search input is more responsive
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ArrayList<AudioModel> filteredList = new ArrayList<>();
+        runOnUiThread(() -> {
+            ArrayList<AudioModel> filteredList = new ArrayList<>();
 
-                for(AudioModel song: deviceSongList) {
-                    if(song.getTitle().toLowerCase().contains(text.toLowerCase())) {
-                        filteredList.add(song);
-                    }
+            for(AudioModel song: deviceSongList) {
+                if(song.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                    filteredList.add(song);
                 }
-
-                adapter.filterList(filteredList);
             }
-        });
 
+            adapter.filterList(filteredList);
+        });
 
     }
 

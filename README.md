@@ -11,7 +11,7 @@ Project Start: 4/26/2022
 Features:
 
 - List of Songs
-- Search functionality
+- Responsive search functionality
 - Multiple aesthetic song displays w/ buttons
 - Shuffle & Repeat Functionality
 - Media Style Notifications w/ Control Buttons

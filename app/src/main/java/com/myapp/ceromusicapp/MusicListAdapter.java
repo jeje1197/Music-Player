@@ -60,11 +60,12 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             } else {
                 MyMediaPlayer.currentIndex = MyMediaPlayer.originalList.indexOf(songData);
             }
-
             context.startService(
                     new Intent(context, MyMediaPlayer.class)
                             .putExtra(MyMediaPlayer.START_SONG, true)
             );
+//            MyMediaPlayer.startSong();
+
 
 //            Open MusicPlayerActivity
             Intent intent = new Intent(context, MusicPlayerActivity.class);
