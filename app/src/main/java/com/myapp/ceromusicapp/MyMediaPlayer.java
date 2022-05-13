@@ -265,7 +265,7 @@ public class MyMediaPlayer extends Service {
 
                     case PlaybackStateCompat.STATE_STOPPED:
                         stopForeground(true);
-                        stopSelf();
+//                        stopSelf();
                         Log.d("-State_Stopped", "Stopping session");
                         break;
 
