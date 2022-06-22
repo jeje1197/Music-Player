@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         AudioModel songData = songList.get(position);
         holder.titleTextView.setText(songData.getTitle());
         holder.artistTextView.setText(songData.getArtist());
-        holder.durationTextView.setText(MediaPlayerHelper.convertToMMSS(songData.getDuration()));
+        holder.durationTextView.setText(songData.getDuration());
 
         if (MyMediaPlayer.currentSong == songData) {
             holder.titleTextView.setTextColor(Color.parseColor("#FF0000"));
@@ -55,16 +56,16 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 //            then index = holder position, otherwise if it's from
 //            a filtered list, you have to search the original list
 //            to get the right index to play from
-            if (songList == MyMediaPlayer.originalList) {
-                MyMediaPlayer.currentIndex = holder.getAdapterPosition();
-            } else {
-                MyMediaPlayer.currentIndex = MyMediaPlayer.originalList.indexOf(songData);
-            }
+            if (songList == MyMediaPlayer.originalList)
+                MyMediaPlayer.setCurrentSong(holder.getAdapterPosition());
+            else
+                MyMediaPlayer.setCurrentSong(songData);
+
+            Log.d("-Holder ", "Song: " + MyMediaPlayer.currentSong.getTitle());
             context.startService(
                     new Intent(context, MyMediaPlayer.class)
                             .putExtra(MyMediaPlayer.START_SONG, true)
             );
-//            MyMediaPlayer.startSong();
 
 
 //            Open MusicPlayerActivity

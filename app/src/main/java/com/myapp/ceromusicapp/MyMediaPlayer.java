@@ -4,7 +4,9 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.media.session.PlaybackState;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -16,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.media.session.MediaButtonReceiver;
 
 import com.myapp.ceromusicapp.Helpers.AudioFocusHelper;
+import com.myapp.ceromusicapp.Helpers.MediaPlayerHelper;
 import com.myapp.ceromusicapp.Helpers.MediaSessionHelper;
 
 import java.io.IOException;
@@ -29,9 +32,8 @@ public class MyMediaPlayer extends Service {
     public static AudioModel currentSong;
     public static MediaSessionCompat mediaSession;
     private static NotificationManager notificationManager;
+    SharedPreferences sp;
 
-    public final static String START_FOREGROUND = "Start Foreground";
-    public final static String START_FOREGROUND_NO_NOTIF = "Start Foreground";
     public final static String START_SONG = "Start Song";
 
     @Nullable
@@ -44,40 +46,25 @@ public class MyMediaPlayer extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (mediaSession == null) {
-            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            MediaSessionHelper.createChannel(notificationManager);
-            mediaSession = initializeMediaSession(this);
-            AudioFocusHelper.initializeAudioManager(this);
-        }
-        Log.d("-Media Player Service onCreate()",
-                "mediaPlayer: " + instance);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("Media Player Service onStart()", "" + intent);
-        startForeground(1, MediaSessionHelper.getNotification(this, mediaSession,
-                instance.isPlaying()));
-        if (mediaSession == null) {
-            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            MediaSessionHelper.createChannel(notificationManager);
-            mediaSession = initializeMediaSession(this);
-            AudioFocusHelper.initializeAudioManager(this);
-        }
+        sp = getSharedPreferences("myMusicPlayerSettings", Context.MODE_PRIVATE);
 
-        if (intent == null) {
-        } else {
-            if (intent.hasExtra(START_FOREGROUND)){
-                startForeground(1, MediaSessionHelper.getNotification(this, mediaSession,
-                        true));
-            }
-            if (intent.hasExtra(START_SONG)){
+        if (currentSong == null) MediaPlayerHelper.checkForLastSavedSong(sp, originalList);
+        mediaSessionCheck();
+        audioManagerCheck();
+
+        startForeground(1, MediaSessionHelper.getNotification(this, mediaSession,
+                false));
+
+        if (intent != null) {
+            if (intent.hasExtra(START_SONG)) {
                 startSong();
             }
-            if (intent.hasExtra(START_FOREGROUND_NO_NOTIF)){
-                startForeground(1, null);
-            }
+
             MediaButtonReceiver.handleIntent(mediaSession, intent);
         }
 
@@ -90,10 +77,33 @@ public class MyMediaPlayer extends Service {
 //    ----------------------------------------------------------------------------------------------
 
     public static MediaPlayer getInstance() {
-        if (instance == null) {
-            instance = new MediaPlayer();
-        }
         return instance;
+    }
+
+    public static void initializeMediaPlayer() {
+        if (instance == null)
+            instance = new MediaPlayer();
+    }
+
+    private static void releaseMediaPlayer() {
+        if (instance != null) {
+            instance.release();
+            instance = null;
+        }
+    }
+
+    public static void setCurrentSong(int songIndex) {
+        currentIndex = songIndex;
+        currentSong = originalList.get(currentIndex);
+    }
+
+    public static void setCurrentSong(AudioModel song) {
+        new Thread(() -> MyMediaPlayer.currentIndex = originalList.indexOf(song));
+        currentSong = song;
+    }
+
+    public static int getMediaPlayerDuration() {
+        return instance.getDuration();
     }
 
     public static ArrayList<AudioModel> getOriginalList() {
@@ -111,52 +121,61 @@ public class MyMediaPlayer extends Service {
 //    Sets current song, updates metadata, requests audio focus,
 //    starts the media player and updates playback state.
     public static void startSong() {
-//        MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_CONNECTING);
-
-        currentSong = currentList.get(currentIndex);
+        initializeMediaPlayer();
         instance.reset();
+        setCurrentSong(currentIndex);
         try {
             instance.setDataSource(currentSong.getPath());
             instance.prepare();
-
-            MediaSessionHelper.updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
-
-            boolean audioFocusGranted = AudioFocusHelper.isAudioFocusGranted();
-            Log.d("-startSong()", "Request Granted: "+ audioFocusGranted);
-            if (audioFocusGranted) {
-                instance.start();
-                MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
-            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        MediaSessionHelper.updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
+        if (AudioFocusHelper.isAudioFocusGranted()) {
+            instance.start();
+            MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
         }
     }
 
 //    Pauses media player if playing. Starts media player if paused.
-//    Updates playback state.
-    public static void pausePlay() {
-        if(MyMediaPlayer.currentIndex == -1)
-            return;
+    public static void pausePlay(SharedPreferences sp) {
+        if(MyMediaPlayer.currentIndex == -1) return;
 
-        if (instance.isPlaying()) {
-            instance.pause();
-            MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PAUSED);
-        } else {
-            boolean audioFocusGranted = AudioFocusHelper.isAudioFocusGranted();
-            Log.d("-pausePlay()", "------------------ Request Granted: "+ audioFocusGranted);
-            if (audioFocusGranted) {
-                instance.start();
-                MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
-            }
+        if (instance != null && instance.isPlaying()) pause(sp);
+        else play(sp);
+    }
+
+    public static void play(SharedPreferences sp) {
+        boolean loadedSong = MediaPlayerHelper.checkForLastSavedSong(sp, originalList);
+
+        if (!loadedSong) {
+            Log.d("-Play()", "No song loaded");
+            return;
         }
+
+        MediaSessionHelper.updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
+        if (AudioFocusHelper.isAudioFocusGranted()) {
+            instance.start();
+            MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PLAYING);
+        }
+    }
+
+    // Pause MediaPlayer, save song data into SharedPreferences,
+    // update state, release mediaPlayer (in state callback)
+    public static void pause(SharedPreferences sp) {
+        instance.pause();
+        MediaPlayerHelper.saveSong(sp, currentSong.getPath(), instance.getCurrentPosition());
+        releaseMediaPlayer();
+
+        MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PAUSED);
     }
 
 //    Decrements the current index if current position >= 3sec
 //    and calls startSong(). Otherwise, restarts the current song.
     public static void playPreviousSong() {
-        if (currentIndex == -1) {
+        if (currentIndex == -1)
             return;
-        }
 
         if (currentIndex > 0 && instance.getCurrentPosition() < 3000 )
             currentIndex--;
@@ -200,7 +219,7 @@ public class MyMediaPlayer extends Service {
             @Override
             public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
                 KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-                Log.d("-onMediaButtonEvent()", "KeyEvent: "+ keyEvent.toString());
+                Log.d("-onMediaButtonEvent()------------------", "KeyEvent: "+ keyEvent.toString());
                 return super.onMediaButtonEvent(mediaButtonEvent);
             }
 
@@ -213,14 +232,14 @@ public class MyMediaPlayer extends Service {
 
             @Override
             public void onPlay() {
-                pausePlay();
+                pausePlay(sp);
                 Log.d("-onPlay()", "Playing song");
                 super.onPlay();
             }
 
             @Override
             public void onPause() {
-                pausePlay();
+                pausePlay(sp);
                 Log.d("-onPause()", "Pausing song");
                 super.onPause();
             }
@@ -234,7 +253,7 @@ public class MyMediaPlayer extends Service {
 
             @Override
             public void onStop() {
-                instance.pause();
+//                instance.pause();
                 MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_STOPPED);
                 Log.d("-onStop()", "Notification swiped away");
                 super.onStop();
@@ -248,6 +267,14 @@ public class MyMediaPlayer extends Service {
                 super.onPlaybackStateChanged(state);
 
                 switch (state.getState()) {
+                    case PlaybackStateCompat.STATE_CONNECTING:
+                        initializeMediaPlayer();
+                        mediaSessionCheck();
+                        audioManagerCheck();
+
+                        Log.d("-State_Connecting", "Connected!");
+                        break;
+
                     case PlaybackStateCompat.STATE_PLAYING:
                         startForeground(1, MediaSessionHelper.getNotification(context, mediaSession,
                                 true));
@@ -277,11 +304,34 @@ public class MyMediaPlayer extends Service {
 
         });
 
-        MediaSessionHelper.updateMetadata(mediaSession, "", "");
+        MediaSessionHelper.updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
+        MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackState.STATE_PAUSED);
 
         mediaSession.setActive(true);
         return mediaSession;
     }
+
+    private void mediaSessionCheck() {
+        if (mediaSession == null) {
+            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            MediaSessionHelper.createChannel(notificationManager);
+            mediaSession = initializeMediaSession(this);
+        }
+    }
+
+    private static void releaseMediaSession() {
+        if (mediaSession != null) {
+            mediaSession.release();
+            mediaSession = null;
+        }
+    }
+
+    private void audioManagerCheck() {
+        if (AudioFocusHelper.getAudioManager() == null)
+            AudioFocusHelper.initializeAudioManager(this);
+    }
+
+
 
 
 //    ----------------------------------------------------------------------------------------------
@@ -291,13 +341,9 @@ public class MyMediaPlayer extends Service {
 //    Releases all key data objects
 //    (audio focus, media session, instance)
     public static void releaseAll() {
-//        AudioFocusHelper.release();
-//
-        mediaSession.release();
-        mediaSession = null;
-
-//        instance.release();
-//        instance = null;
+        releaseMediaPlayer();
+        AudioFocusHelper.releaseAudioManager();
+        releaseMediaSession();
     }
 
 //    Release all objects when service is destroyed

@@ -21,7 +21,6 @@ public class MusicPlayerActivity extends AppCompatActivity {
     private ImageView musicIcon;
     private ImageView shuffleButton;
     private ImageView repeatButton;
-    private final MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
     private AudioModel currentSong;
     private int degrees = 0;
     private boolean shuffleOn;
@@ -58,16 +57,18 @@ public class MusicPlayerActivity extends AppCompatActivity {
         MusicPlayerActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mediaPlayer != null && MusicPlayerActivity.isActive) {
-                    if (currentSong != MyMediaPlayer.currentSong){
+                if (MusicPlayerActivity.isActive) {
+                    MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
+                    if (currentSong != MyMediaPlayer.currentSong)
                         setResourcesWithMusic();
+
+                    if (mediaPlayer != null) {
+                        int currentPosition = mediaPlayer.getCurrentPosition();
+                        seekbar.setProgress(currentPosition);
+                        currentTimeView.setText(MediaPlayerHelper.convertToMMSS(currentPosition + ""));
                     }
 
-                    int currentPosition = mediaPlayer.getCurrentPosition();
-                    seekbar.setProgress(currentPosition);
-                    currentTimeView.setText(MediaPlayerHelper.convertToMMSS(currentPosition + ""));
-
-                    if(mediaPlayer.isPlaying()) {
+                    if(mediaPlayer != null && mediaPlayer.isPlaying()) {
                         pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24);
                         musicIcon.setRotation(degrees++);
                     } else {
@@ -79,13 +80,16 @@ public class MusicPlayerActivity extends AppCompatActivity {
         });
 
         previousButton.setOnClickListener(view -> MyMediaPlayer.playPreviousSong());
-        pausePlayButton.setOnClickListener(view -> MyMediaPlayer.pausePlay());
+        pausePlayButton.setOnClickListener(view -> MyMediaPlayer.pausePlay(
+                getSharedPreferences("myMusicPlayerSettings", Context.MODE_PRIVATE))
+        );
         nextButton.setOnClickListener(view -> MyMediaPlayer.playNextSong());
         shuffleButton.setOnClickListener(view -> toggleShuffle());
         repeatButton.setOnClickListener(view -> toggleRepeat());
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
                 if (mediaPlayer != null && b) {
                     mediaPlayer.seekTo(i);
                 }
@@ -108,8 +112,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
         currentSong = MyMediaPlayer.currentSong;
         titleView.setText(currentSong.getTitle());
         artistView.setText(currentSong.getArtist());
-        totalTimeView.setText(MediaPlayerHelper.convertToMMSS(currentSong.getDuration()));
-        seekbar.setMax(mediaPlayer.getDuration());
+        totalTimeView.setText(currentSong.getDuration());
+        seekbar.setMax(MyMediaPlayer.getMediaPlayerDuration());
     }
 
 

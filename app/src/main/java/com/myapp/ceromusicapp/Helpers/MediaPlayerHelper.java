@@ -1,10 +1,13 @@
 package com.myapp.ceromusicapp.Helpers;
 
+import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.util.Log;
 
 import com.myapp.ceromusicapp.AudioModel;
 import com.myapp.ceromusicapp.MyMediaPlayer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
@@ -60,6 +63,56 @@ public class MediaPlayerHelper {
         }
     }
 
+//    ----------------------------------------------------------------------------------------------
+//     Methods here
+//    ----------------------------------------------------------------------------------------------
+
+    public static boolean checkForLastSavedSong(SharedPreferences sp, ArrayList<AudioModel> songList) {
+        String last_song_path = sp.getString("last_song_path", null);
+        int last_song_position = sp.getInt("last_song_position", -1);
+
+        if (last_song_path != null) {
+            for(AudioModel song: songList) {
+                if (song.getPath().equals(last_song_path)) {
+                    loadSong(song, last_song_path, last_song_position);
+
+                    new Thread(() -> MyMediaPlayer.currentIndex = songList.indexOf(song));
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static void loadSong(AudioModel song, String path, int currentPosition) {
+        MyMediaPlayer.initializeMediaPlayer();
+        MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
+        mediaPlayer.reset();
+        MyMediaPlayer.currentSong = song;
+        Log.d("-Load Song", "Path: " + path);
+        Log.d("-Load Song", "MediaPlayer: " + mediaPlayer);
+        try {
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+            mediaPlayer.seekTo(currentPosition);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveSong(SharedPreferences sp, String path, int position){
+        Log.d("Saving Song", String.format("Path: %s\n Current Position: %s\n",
+                path, MediaPlayerHelper.convertToMMSS(Integer.toString(position)))
+        );
+        sp.edit().putString("last_song_path", path)
+                .putInt("last_song_position", position)
+                .apply();
+    }
+
+//    ----------------------------------------------------------------------------------------------
+//    Time Format Methods here
+//    ----------------------------------------------------------------------------------------------
     public static String convertToMMSS(String duration) {
         long millis = Long.parseLong(duration);
         return String.format(Locale.US, "%02d:%02d",

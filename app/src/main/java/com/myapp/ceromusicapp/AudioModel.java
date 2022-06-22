@@ -1,6 +1,8 @@
 package com.myapp.ceromusicapp;
 
 import java.io.Serializable;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class AudioModel implements Serializable {
     String path;
@@ -24,7 +26,10 @@ public class AudioModel implements Serializable {
     }
 
     public String getDuration() {
-        return duration;
+        long millis = Long.parseLong(duration);
+        return String.format(Locale.US, "%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
 
     public String getArtist() {

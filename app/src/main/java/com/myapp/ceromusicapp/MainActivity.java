@@ -35,14 +35,12 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
-
     RecyclerView recyclerView;
     MusicListAdapter adapter;
 
     TextView noMusicTextView, minibarTextView, minibarArtistView;
     EditText searchEditText;
     ArrayList<AudioModel> deviceSongList = MyMediaPlayer.getOriginalList();
-    MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
     int savedPosition;
     SharedPreferences sp;
     RelativeLayout minibarLayout;
@@ -125,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
 //    ----------------------------------------------------------------------------------------------
 //    Device Query & RecyclerView Methods here
 //    ----------------------------------------------------------------------------------------------
@@ -155,6 +152,13 @@ public class MainActivity extends AppCompatActivity {
             }
             cursor.close();
             MediaPlayerHelper.createShuffledPlaylist(deviceSongList);
+        }
+
+        if (MyMediaPlayer.currentIndex == -1) {
+            if (MediaPlayerHelper.checkForLastSavedSong(sp, deviceSongList)) {
+                Intent intent = new Intent(this, MyMediaPlayer.class);
+                startForegroundService(intent);
+            }
         }
 
         //  Set up recycler view with songs
@@ -221,8 +225,9 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mediaPlayer != null && MainActivity.isActive) {
-                    if(mediaPlayer.isPlaying()) {
+                if (MainActivity.isActive) {
+                    MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
+                    if(mediaPlayer != null && mediaPlayer.isPlaying()) {
                         miniPausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24);
                     } else {
                         miniPausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24);
@@ -239,10 +244,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         miniPreviousButton.setOnClickListener(view -> MyMediaPlayer.playPreviousSong());
-        miniPausePlayButton.setOnClickListener(view -> MyMediaPlayer.pausePlay());
+        miniPausePlayButton.setOnClickListener(view -> MyMediaPlayer.pausePlay(sp));
         miniNextButton.setOnClickListener(view -> MyMediaPlayer.playNextSong());
         minibarTextView.setOnClickListener(view -> goToCurrentSongView());
     }
+
+
 
 
 //    ----------------------------------------------------------------------------------------------
@@ -308,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
             searchEditText.setVisibility(View.GONE);
             searchButton.setImageResource(R.drawable.ic_baseline_search_24);
             hideKeyboard();
-            if (!searchEditText.getText().equals(""))
+            if (!searchEditText.getText().toString().equals(""))
                 searchEditText.setText("");
         }
     }
@@ -319,7 +326,6 @@ public class MainActivity extends AppCompatActivity {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
         }
-
     }
 
     @Override

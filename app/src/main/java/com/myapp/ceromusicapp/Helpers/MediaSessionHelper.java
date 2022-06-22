@@ -24,7 +24,6 @@ public class MediaSessionHelper {
     private static MediaMetadataCompat.Builder metadataBuilder;
     private static final String CHANNEL_ID = "channel1";
 
-
 //    ----------------------------------------------------------------------------------------------
 //    Channel & Notification Methods here
 //    ----------------------------------------------------------------------------------------------

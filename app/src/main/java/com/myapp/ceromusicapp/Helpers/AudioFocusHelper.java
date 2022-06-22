@@ -14,9 +14,20 @@ public class AudioFocusHelper {
     private static AudioManager audioManager;
     private static final MediaPlayer mediaPlayer = MyMediaPlayer.getInstance();
 
+    public static AudioManager getAudioManager() {
+        return audioManager;
+    }
+
     public static void initializeAudioManager(Context context) {
         if (audioManager == null)
             audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    public static void releaseAudioManager() {
+        if (audioManager != null) {
+            audioManager.abandonAudioFocusRequest(audioFocusRequest);
+            audioManager = null;
+        }
     }
 
     public static boolean isAudioFocusGranted() {
@@ -73,10 +84,6 @@ public class AudioFocusHelper {
             .setOnAudioFocusChangeListener(audioFocusChangeListener)
             .build();
 
-    public static void release() {
-        audioManager.abandonAudioFocusRequest(audioFocusRequest);
-        audioManager = null;
-    }
 
 //    Helper functions to start/pause mediaplayer instance
 //    without checking any extra conditions unlike in MyMediaPlayer.class
