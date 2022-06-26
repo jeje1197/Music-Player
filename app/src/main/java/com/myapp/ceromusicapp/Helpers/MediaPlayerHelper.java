@@ -68,6 +68,10 @@ public class MediaPlayerHelper {
 //    ----------------------------------------------------------------------------------------------
 
     public static boolean checkForLastSavedSong(SharedPreferences sp, ArrayList<AudioModel> songList) {
+        if (songList == null) {
+            Log.d("-checkForLastSavedSong", "Song List: null");
+            return false;
+        }
         String last_song_path = sp.getString("last_song_path", null);
         int last_song_position = sp.getInt("last_song_position", -1);
 

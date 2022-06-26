@@ -223,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupMinibarButtons() {
+        Log.d("-Minibar", "Song: " +  getCurrentSongTitle());
 //        ------- Thread -------
         runOnUiThread(new Runnable() {
             @Override

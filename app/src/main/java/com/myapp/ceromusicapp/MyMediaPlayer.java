@@ -373,7 +373,9 @@ public class MyMediaPlayer extends Service {
 
         });
 
-        MediaSessionHelper.updateMetadata(mediaSession, currentSong.getTitle(), currentSong.getArtist());
+        MediaSessionHelper.updateMetadata(mediaSession,
+                currentSong == null ? currentSong.getTitle() : "No Song Selected"
+                , currentSong == null ? currentSong.getArtist() : "---");
         MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackState.STATE_PAUSED);
 
         mediaSession.setActive(true);
