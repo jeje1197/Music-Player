@@ -32,7 +32,7 @@ public class MyMediaPlayer extends Service {
     public static AudioModel currentSong;
     public static MediaSessionCompat mediaSession;
     private static NotificationManager notificationManager;
-    SharedPreferences sp;
+    static SharedPreferences sp;
 
     public final static String START_SONG = "Start Song";
 
@@ -76,15 +76,25 @@ public class MyMediaPlayer extends Service {
 //    MediaPlayer & SongList Getter Methods here
 //    ----------------------------------------------------------------------------------------------
 
+    /**
+     * @return the current Media Player object
+     */
     public static MediaPlayer getInstance() {
         return instance;
     }
 
+    /**
+     * Initializes the current MediaPlayer object, if null
+     */
     public static void initializeMediaPlayer() {
         if (instance == null)
             instance = new MediaPlayer();
     }
 
+    /**
+     * Releases the current MediaPlayer object and sets
+     * it to null.
+     */
     private static void releaseMediaPlayer() {
         if (instance != null) {
             instance.release();
@@ -92,20 +102,54 @@ public class MyMediaPlayer extends Service {
         }
     }
 
-    public static void setCurrentSong(int songIndex) {
+    /**
+     * Sets the current index and song based on its index in the
+     * device song list.
+     * @param songIndex
+     */
+    public static void setCurrentSongFromOriginalList(int songIndex) {
         currentIndex = songIndex;
         currentSong = originalList.get(currentIndex);
     }
 
+    /**
+     * Sets the current index and song based on its index in the
+     * current song list.
+     * @param songIndex
+     */
+    public static void setCurrentSong(int songIndex) {
+        currentIndex = songIndex;
+        currentSong = currentList.get(currentIndex);
+    }
+
+    /**
+     * Sets the current song based on an AudioModel object.
+     * Index of current song is automatically updated to match.
+     * @param song
+     */
     public static void setCurrentSong(AudioModel song) {
-        new Thread(() -> MyMediaPlayer.currentIndex = originalList.indexOf(song));
+        MyMediaPlayer.currentIndex = originalList.indexOf(song);
         currentSong = song;
     }
 
+
+    /**
+     * @return The duration of the song loaded in
+     * the Media Player object.
+     */
     public static int getMediaPlayerDuration() {
-        return instance.getDuration();
+        if (instance != null) {
+            return instance.getDuration();
+        } else if (MediaPlayerHelper.checkForLastSavedSong(sp, currentList)) {
+            return instance.getDuration();
+        } else {
+            return instance.getDuration();
+        }
     }
 
+    /**
+     * @return The list of device songs.
+     */
     public static ArrayList<AudioModel> getOriginalList() {
         if (originalList == null) {
             originalList = new ArrayList<>();
@@ -118,12 +162,13 @@ public class MyMediaPlayer extends Service {
 //    Playback Methods here
 //    ----------------------------------------------------------------------------------------------
 
-//    Sets current song, updates metadata, requests audio focus,
-//    starts the media player and updates playback state.
+    /**
+     * Starts the current song from playback position 0.
+     */
     public static void startSong() {
         initializeMediaPlayer();
         instance.reset();
-        setCurrentSong(currentIndex);
+
         try {
             instance.setDataSource(currentSong.getPath());
             instance.prepare();
@@ -138,7 +183,12 @@ public class MyMediaPlayer extends Service {
         }
     }
 
-//    Pauses media player if playing. Starts media player if paused.
+    /**
+     * Pauses the current song, if playing.
+     * Resumes the current song, if paused.
+     * If current index is equal to -1, does nothing.
+     * @param sp
+     */
     public static void pausePlay(SharedPreferences sp) {
         if(MyMediaPlayer.currentIndex == -1) return;
 
@@ -146,6 +196,12 @@ public class MyMediaPlayer extends Service {
         else play(sp);
     }
 
+    /**
+     * Re-initializes Media Player object, loads data of the
+     * current song and resumes playback.
+     * If no song is loaded, does nothing.
+     * @param sp
+     */
     public static void play(SharedPreferences sp) {
         boolean loadedSong = MediaPlayerHelper.checkForLastSavedSong(sp, originalList);
 
@@ -161,8 +217,12 @@ public class MyMediaPlayer extends Service {
         }
     }
 
-    // Pause MediaPlayer, save song data into SharedPreferences,
-    // update state, release mediaPlayer (in state callback)
+    /**
+     * Pauses the currently playing song, stores its
+     * data in SharedPreferences and releases MediaPlayer
+     * object.
+     * @param sp
+     */
     public static void pause(SharedPreferences sp) {
         instance.pause();
         MediaPlayerHelper.saveSong(sp, currentSong.getPath(), instance.getCurrentPosition());
@@ -171,8 +231,12 @@ public class MyMediaPlayer extends Service {
         MediaSessionHelper.updatePlaybackState(mediaSession, PlaybackStateCompat.STATE_PAUSED);
     }
 
-//    Decrements the current index if current position >= 3sec
-//    and calls startSong(). Otherwise, restarts the current song.
+    /**
+     * Decrements the current index and starts song,
+     * if playback position is less than 3 seconds in.
+     * Otherwise, restarts current song.
+     * If current index is -1, does nothing.
+     */
     public static void playPreviousSong() {
         if (currentIndex == -1)
             return;
@@ -180,11 +244,15 @@ public class MyMediaPlayer extends Service {
         if (currentIndex > 0 && instance.getCurrentPosition() < 3000 )
             currentIndex--;
 
+        setCurrentSong(currentIndex);
         startSong();
     }
 
-//    Increments the current index to the next song
-//    and calls startSong().
+    /**
+     * Increments the current index and starts song,
+     * if not at end of list.
+     * If current index is -1, does nothing.
+     */
     public static void playNextSong() {
         if (currentIndex == -1)
             return;
@@ -192,6 +260,7 @@ public class MyMediaPlayer extends Service {
         if (currentIndex < currentList.size() - 1)
             currentIndex++;
 
+        setCurrentSong(currentIndex);
         startSong();
     }
 

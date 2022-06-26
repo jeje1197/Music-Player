@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
             getSongsFromDevice();
         }
 
+        MyMediaPlayer.initializeMediaPlayer();
+
         setupSearchButton();
         setupSearchEditText();
 

@@ -57,7 +57,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 //            a filtered list, you have to search the original list
 //            to get the right index to play from
             if (songList == MyMediaPlayer.originalList)
-                MyMediaPlayer.setCurrentSong(holder.getAdapterPosition());
+                MyMediaPlayer.setCurrentSongFromOriginalList(holder.getAdapterPosition());
             else
                 MyMediaPlayer.setCurrentSong(songData);
 
