@@ -3,8 +3,9 @@ Created by Joseph Evans
 -------
 
 This is an Android music player application
-that I started working on to build my skills
-in mobile development.
+I developed in order to improve the music listening experience
+for users. This application gathers all your device songs into one place for
+easy access.
 
 Project Start: 4/26/2022
 
@@ -19,7 +20,6 @@ Features:
 - AudioFocus
 
 Future:
-- Remember Most Recently Played Song & Position After Closed
 - Playlist Creation
 - Accessibility
 - Choice of Theme (Background Color)
