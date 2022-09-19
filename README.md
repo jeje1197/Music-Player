@@ -3,9 +3,7 @@ Created by Joseph Evans
 -------
 
 This is an Android music player application
-I developed in order to improve the music listening experience
-for users. This application gathers all your device songs into one place for
-easy access.
+I developed in order to improve the music listening experience for users. A key proponent for user disatisfaction are service-commercials and having to browse multiple minutes through their bracket for the song they want to listen to next. Cero's Music Player aims to fix that by gathering all device songs into a single place for easy access. Songs are placed into a list you can scroll up and down or filter by name with a search bar.
 
 Project Start: 4/26/2022
 
