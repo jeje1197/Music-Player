@@ -20,6 +20,6 @@ Features:
 - AudioFocus
 
 Future:
-- Playlist Creation
+- User-Defined Playlists
 - Accessibility
 - Choice of Theme (Background Color)
