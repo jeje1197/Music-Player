@@ -10,6 +10,7 @@ easy access.
 Project Start: 4/26/2022
 
 Tools used: Android Studio, Android SDK, Java, XML
+
 Features:
 
 - List of Songs
