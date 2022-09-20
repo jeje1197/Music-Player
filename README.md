@@ -40,3 +40,4 @@ Song files have information detailing:
 This will prompt the song to play and open another activity page with song info, a scroll bar, and buttons (skip previous,
 pause/play, skip next, shuffle, repeat). A notification bar will also popup allowing you to control music from outside of the app.
 
+4) That's it. Enjoy!
